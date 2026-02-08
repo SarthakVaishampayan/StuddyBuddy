@@ -1,32 +1,34 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth.js';
 
 dotenv.config();
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Your Vite Frontend URL
+  credentials: true
+}));
 app.use(express.json());
 
-// Health check route
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    service: "StudyBuddy Backend",
-    phase: "1-setup",
-  });
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'Backend is running!' });
 });
 
-// Root simple route
-app.get("/", (req, res) => {
-  res.send("StudyBuddy backend is running.");
-});
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Use env PORT or default 5000
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-  console.log(`StudyBuddy backend listening on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
