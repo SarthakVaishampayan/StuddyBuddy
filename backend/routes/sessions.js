@@ -30,7 +30,7 @@ router.get("/today", protectRoute, async (req, res) => {
     if (yesterdaySec > 0) {
       percentChange = ((todaySec - yesterdaySec) / yesterdaySec) * 100;
     } else if (todaySec > 0) {
-      percentChange = 100; // 100% gain if yesterday was zero
+      percentChange = 100;
     }
 
     res.json({ success: true, totalSeconds: todaySec, percentChange: parseFloat(percentChange.toFixed(0)) });
@@ -42,6 +42,7 @@ router.get("/weekly-stats", protectRoute, async (req, res) => {
     const daysArr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const graphData = [];
     
+    // Calculate last 7 days ending with today
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -58,8 +59,8 @@ router.get("/weekly-stats", protectRoute, async (req, res) => {
       graphData.push({
         day: daysArr[date.getDay()],
         date: `${date.getDate()}/${date.getMonth() + 1}`,
-        hours: parseFloat((sec / 3600).toFixed(4)), // High precision for small bars
-        rawSeconds: sec
+        hours: parseFloat((sec / 3600).toFixed(4)),
+        rawSeconds: sec // Send raw seconds for accurate summation on frontend
       });
     }
 
