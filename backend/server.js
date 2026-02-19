@@ -2,7 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+
+// Route Imports
 import authRoutes from "./routes/auth.js";
+import habitRoutes from "./routes/habits.js";
+import sessionRoutes from "./routes/sessions.js";
 
 dotenv.config();
 
@@ -15,48 +19,25 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "10mb" }));
 
-// Enhanced MongoDB Connection (Local Priority)
+// MongoDB Connection
 const connectDB = async () => {
   try {
-    // Test local first, fallback to Atlas
     const localUri = process.env.MONGODB_URI || "mongodb://localhost:27017/studybuddy";
-    
-    await mongoose.connect(localUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    
-    console.log("✅ MongoDB Connected:", localUri.includes('localhost') ? "LOCAL" : "ATLAS");
-    console.log("📊 Database: studybuddy");
-    
+    await mongoose.connect(localUri);
+    console.log("✅ MongoDB Connected: LOCAL");
   } catch (error) {
     console.error("❌ MongoDB Connection Failed:", error.message);
-    console.log("💡 Starting in DEMO MODE (no persistence)");
   }
 };
 
-// Health check with DB status
-app.get("/api/health", async (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? "✅ Connected" : "⚠️ Demo Mode";
-  res.json({
-    success: true,
-    message: "StudyBuddy Backend - Phase 3 Complete",
-    mongodb: dbStatus,
-    local: mongoose.connection.name === "studybuddy",
-    timestamp: new Date().toISOString()
-  });
-});
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/habits", habitRoutes);
+app.use("/api/sessions", sessionRoutes);
 
-// Demo endpoints (still available for frontend testing)
+// Demo data fallback (Keep for dashboard charts until Phase 7 is fully finished)
 app.get("/api/demo/dashboard", (req, res) => {
   res.json({
-    studyStats: { today: 4.2, week: 25.5, yesterday: 3.2 },
-    habits: [
-      { id: 1, name: "Exercise", streak: 12, today: true },
-      { id: 2, name: "Reading", streak: 8, today: false },
-      { id: 3, name: "Water Intake", streak: 45, today: true },
-      { id: 4, name: "8h Sleep", streak: 3, today: false }
-    ],
     barData: [
       { name: "Sun", hours: 4 }, { name: "Mon", hours: 6 },
       { name: "Tue", hours: 4.5 }, { name: "Wed", hours: 7 },
@@ -65,29 +46,17 @@ app.get("/api/demo/dashboard", (req, res) => {
   });
 });
 
-// API Routes
-app.use("/api/auth", authRoutes);
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error("🚨 ERROR:", err.stack);
-  res.status(500).json({ success: false, message: "Server error" });
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    success: true, 
+    mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected" 
+  });
 });
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  await mongoose.connection.close();
-  console.log("👋 MongoDB disconnected");
-  process.exit(0);
-});
-
-// Start Server
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`\n🚀 StudyBuddy Backend - Phase 3 LIVE`);
-    console.log(`📡 http://localhost:${PORT}`);
-    console.log(`🔍 Health: http://localhost:${PORT}/api/health`);
-    console.log(`🧪 Demo: http://localhost:${PORT}/api/demo/dashboard\n`);
+    console.log(`🚀 StudyBuddy Backend LIVE on http://localhost:${PORT}`);
   });
 });
