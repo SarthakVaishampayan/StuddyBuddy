@@ -1,10 +1,12 @@
 import { LayoutDashboard, BookOpen, CheckSquare, MessageSquare, LogOut, User, Book, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -47,7 +49,7 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* Profile Section - Clickable */}
+      {/* Profile Section - Shows Real User */}
       <div 
         className="p-4 border-top cursor-pointer hover-bg-light" 
         onClick={() => navigate('/profile')}
@@ -58,13 +60,20 @@ const Sidebar = () => {
           </div>
           {!isCollapsed && (
             <div>
-              <p className="mb-0 fw-bold small text-dark">Aman Gupta</p>
+              <p className="mb-0 fw-bold small text-dark">{user?.name || 'User'}</p>
               <p className="mb-0 text-muted x-small">View Profile</p>
             </div>
           )}
         </div>
         {!isCollapsed && (
-          <div className="mt-3 text-danger small d-flex align-items-center gap-2" role="button" onClick={(e) => { e.stopPropagation(); /* Logout logic */ }}>
+          <div 
+            className="mt-3 text-danger small d-flex align-items-center gap-2" 
+            role="button" 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              logout();
+            }}
+          >
             <LogOut size={16} /> Logout
           </div>
         )}
