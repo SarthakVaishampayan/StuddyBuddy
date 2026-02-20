@@ -1,7 +1,8 @@
 // File: StudyBuddy/frontend/src/components/Sidebar.jsx
 import {
-  LayoutDashboard, BookOpen, CheckSquare, MessageSquare,
-  LogOut, User, Book, ChevronLeft, ChevronRight
+  LayoutDashboard, BookOpen, Book,
+  MessageSquare, LogOut, User,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -14,11 +15,10 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
-    { name: 'Dashboard',   icon: <LayoutDashboard size={20} />, path: '/' },
-    { name: 'Analytics',   icon: <BookOpen size={20} />,        path: '/analytics' },
-    { name: 'Assignments', icon: <CheckSquare size={20} />,     path: '/assignments' },
-    { name: 'Subjects',    icon: <Book size={20} />,            path: '/subjects' },
-    { name: 'Chats',       icon: <MessageSquare size={20} />,   path: '/chats' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+    { name: 'Analytics', icon: <BookOpen size={20} />,        path: '/analytics' },
+    { name: 'Subjects',  icon: <Book size={20} />,            path: '/subjects' },
+    { name: 'Chats',     icon: <MessageSquare size={20} />,   path: '/chats' },
   ];
 
   return (
@@ -32,6 +32,7 @@ const Sidebar = () => {
         flexShrink: 0,
       }}
     >
+      {/* Collapse Toggle */}
       <div className="p-3 d-flex justify-content-end">
         <button
           className="btn btn-sm btn-light rounded-circle"
@@ -41,6 +42,7 @@ const Sidebar = () => {
         </button>
       </div>
 
+      {/* Logo */}
       <div
         className={`px-4 mb-4 d-flex align-items-center gap-2 ${
           isCollapsed ? 'justify-content-center' : ''
@@ -52,16 +54,19 @@ const Sidebar = () => {
         {!isCollapsed && <h5 className="mb-0 fw-bold">StudyBuddy</h5>}
       </div>
 
+      {/* Menu Items */}
       <div className="flex-grow-1 mt-2">
         {menuItems.map((item, idx) => (
           <div
             key={idx}
-            className={`d-flex align-items-center px-4 py-3 nav-link-custom ${
-              location.pathname === item.path ? 'nav-link-active' : ''
-            } ${isCollapsed ? 'justify-content-center px-0' : ''}`}
+            className={`d-flex align-items-center px-4 py-3 nav-link-custom
+              ${location.pathname === item.path ? 'nav-link-active' : ''}
+              ${isCollapsed ? 'justify-content-center px-0' : ''}
+            `}
             role="button"
             style={{ cursor: 'pointer' }}
             onClick={() => navigate(item.path)}
+            title={isCollapsed ? item.name : ''}
           >
             <span className={isCollapsed ? '' : 'me-3'}>{item.icon}</span>
             {!isCollapsed && <span className="fw-medium">{item.name}</span>}

@@ -9,6 +9,7 @@ import habitRoutes from "./routes/habits.js";
 import sessionRoutes from "./routes/sessions.js";
 import taskRoutes from "./routes/tasks.js";
 import reminderRoutes from "./routes/reminders.js";
+import subjectRoutes from './routes/subjects.js';
 
 // Configuration
 dotenv.config();
@@ -38,6 +39,7 @@ app.use("/api/habits", habitRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/reminders", reminderRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 // Health Check Endpoint
 app.get("/api/health", (req, res) => {
