@@ -1,3 +1,4 @@
+// File: StudyBuddy/backend/models/User.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -19,17 +20,23 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [6, "Password must be at least 6 characters"]
   },
+  bio: {
+    type: String,
+    default: ""
+  },
+  studyGoal: {
+    type: String,
+    default: ""
+  },
   stats: {
     totalStudyHours: { type: Number, default: 0 },
-    longestStreak: { type: Number, default: 0 },
-    tasksCompleted: { type: Number, default: 0 }
+    longestStreak:   { type: Number, default: 0 },
+    tasksCompleted:  { type: Number, default: 0 }
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

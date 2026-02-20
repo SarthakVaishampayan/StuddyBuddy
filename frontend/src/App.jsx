@@ -1,15 +1,20 @@
+// File: StudyBuddy/frontend/src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Todo from './pages/Todo';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TimerProvider, useTimer } from './context/TimerContext';
+import { NotificationProvider, useNotification } from './context/NotificationContext';
+import NotificationToast from './components/NotificationToast';
 
 import { Save, RotateCcw, Trash2, AlertCircle } from 'lucide-react';
 
@@ -47,7 +52,7 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// GLOBAL TIMER FINISH MODAL (shows on any page)
+// GLOBAL TIMER FINISH MODAL
 const GlobalTimerFinishModal = () => {
   const { token } = useAuth();
   const {
@@ -60,6 +65,7 @@ const GlobalTimerFinishModal = () => {
     initialTime,
     elapsedTime,
   } = useTimer();
+  const { notifyInfo } = useNotification();
 
   const formatHms = (sec) => {
     const s = Math.max(0, Number(sec) || 0);
@@ -77,7 +83,7 @@ const GlobalTimerFinishModal = () => {
     }
 
     try {
-      await fetch('http://localhost:5000/api/sessions', {
+      const res = await fetch('http://localhost:5000/api/sessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,24 +92,20 @@ const GlobalTimerFinishModal = () => {
         body: JSON.stringify({ durationInSeconds: studied }),
       });
 
-      // After logging: close popup and reset the timer state
-      setSessionEnded(false);
-
-      // reset based on mode
-      // stopwatch -> 0, timer -> full duration
-      if (mode === 'timer') {
-        // keep ready for next run
-        // (we don't have direct setters here; your Dashboard can set it again)
+      if (res.ok) {
+        setSessionEnded(false);
+        notifyInfo(`Logged ${formatHms(studied)} to study time.`);
+      } else {
+        notifyInfo('Could not log session. Try again later.');
       }
     } catch (e) {
       console.error('Failed to log session:', e);
-      // Keep modal open so user can retry or discard
+      notifyInfo('Failed to log session. Try again later.');
     }
   };
 
   if (!sessionEnded) return null;
 
-  // For countdown: show remaining too (useful info)
   const studiedSec = getTimeStudied();
   const remainingSec = mode === 'timer' ? elapsedTime : null;
   const goalSec = mode === 'timer' ? initialTime : null;
@@ -123,11 +125,13 @@ const GlobalTimerFinishModal = () => {
           <AlertCircle size={44} className="text-primary mb-2" />
           <h5 className="fw-bold mb-2">Session finished</h5>
           <p className="text-muted small mb-3">
-            Time studied: <span className="fw-bold text-dark">{formatHms(studiedSec)}</span>
+            Time studied:{' '}
+            <span className="fw-bold text-dark">{formatHms(studiedSec)}</span>
             {mode === 'timer' && (
               <>
                 <br />
-                Goal: <span className="fw-bold text-dark">{formatHms(goalSec)}</span>, Remaining:{' '}
+                Goal:{' '}
+                <span className="fw-bold text-dark">{formatHms(goalSec)}</span>, Remaining:{' '}
                 <span className="fw-bold text-dark">{formatHms(remainingSec)}</span>
               </>
             )}
@@ -138,11 +142,9 @@ const GlobalTimerFinishModal = () => {
           <button className="btn btn-primary py-2 fw-bold rounded-3" onClick={handleLog} type="button">
             <Save className="me-2" size={18} /> Log time
           </button>
-
           <button className="btn btn-outline-secondary py-2 fw-bold rounded-3" onClick={restartSession} type="button">
             <RotateCcw className="me-2" size={18} /> Restart
           </button>
-
           <button className="btn btn-light py-2 fw-bold rounded-3 text-danger" onClick={discardSession} type="button">
             <Trash2 className="me-2" size={18} /> Discard
           </button>
@@ -157,29 +159,34 @@ function App() {
     <Router>
       <AuthProvider>
         <TimerProvider>
-          <MainLayout>
-            <GlobalTimerFinishModal />
+          <NotificationProvider>
+            <MainLayout>
+              <GlobalTimerFinishModal />
+              <NotificationToast />
 
-            <Routes>
-              {/* Auth */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Routes>
+                {/* Auth */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-              {/* Main */}
-              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-              <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
+                {/* Main */}
+                <Route path="/" element={<ProtectedRoute>{/* @ts-expect-error */}<Dashboard /></ProtectedRoute>} />
+                <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
+                
+                {/* Real Pages (Phase 10 Update) */}
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-              {/* Placeholders */}
-              <Route path="/assignments" element={<ProtectedRoute><Placeholder title="Assignments" /></ProtectedRoute>} />
-              <Route path="/subjects" element={<ProtectedRoute><Placeholder title="Subjects" /></ProtectedRoute>} />
-              <Route path="/chats" element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Placeholder title="Settings" /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Placeholder title="Profile" /></ProtectedRoute>} />
+                {/* Placeholders (To be replaced in Phase 11) */}
+                <Route path="/assignments" element={<ProtectedRoute><Placeholder title="Assignments" /></ProtectedRoute>} />
+                <Route path="/subjects" element={<ProtectedRoute><Placeholder title="Subjects" /></ProtectedRoute>} />
+                <Route path="/chats" element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </MainLayout>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </MainLayout>
+          </NotificationProvider>
         </TimerProvider>
       </AuthProvider>
     </Router>

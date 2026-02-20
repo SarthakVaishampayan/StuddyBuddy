@@ -1,3 +1,4 @@
+// File: StudyBuddy/frontend/src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -5,19 +6,17 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser]   = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load user from token on mount
+  // Load user from token on mount / token change
   useEffect(() => {
     const loadUser = async () => {
       if (!token) {
@@ -25,16 +24,16 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
+        const res  = await fetch('http://localhost:5000/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         if (data.success) {
-          setUser(data.user);
+          setUser(data.user); // includes bio, studyGoal from DB
         } else {
           logout(false);
         }
-      } catch (e) {
+      } catch {
         logout(false);
       } finally {
         setLoading(false);
@@ -45,10 +44,10 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
+    const res  = await fetch('http://localhost:5000/api/auth/login', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body:    JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (data.success) {
@@ -61,10 +60,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/register', {
-      method: 'POST',
+    const res  = await fetch('http://localhost:5000/api/auth/register', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+      body:    JSON.stringify({ name, email, password }),
     });
     const data = await res.json();
     if (data.success) {
@@ -76,6 +75,12 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  // Call this after a successful PATCH /api/auth/update
+  // so profile data persists across page navigations
+  const updateUser = (updatedFields) => {
+    setUser((prev) => ({ ...prev, ...updatedFields }));
+  };
+
   const logout = (redirect = true) => {
     localStorage.removeItem('token');
     setToken(null);
@@ -84,7 +89,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, register, logout, loading, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
