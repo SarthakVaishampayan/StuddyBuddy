@@ -1,14 +1,18 @@
+// File: StudyBuddy/frontend/src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import StudyGoalCard from '../components/StudyGoalCard';
+import HabitCalendarModal from '../components/HabitCalendarModal';
 import { useAuth } from '../context/AuthContext';
 import { useTimer } from '../context/TimerContext';
 import {
   Play, Pause, Save, RotateCcw, Check, Plus, Trash2,
-  Calendar, AlertCircle, Clock, Hourglass
+  Calendar, AlertCircle, Clock, Hourglass, Flame
 } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, YAxis
+  BarChart, Bar, XAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell, YAxis
 } from 'recharts';
 
 const Dashboard = () => {
@@ -20,12 +24,12 @@ const Dashboard = () => {
     timerRunning, setTimerRunning,
     mode, setMode,
     initialTime, setInitialTime,
-    getTimeStudied
+    getTimeStudied,
   } = useTimer();
 
   // Data
   const [habits, setHabits] = useState([]);
-  const [studyStats, setStudyStats] = useState({ today: "0m 0s", totalSeconds: 0, percentChange: 0 });
+  const [studyStats, setStudyStats] = useState({ today: '0m 0s', totalSeconds: 0, percentChange: 0 });
   const [pendingTasks, setPendingTasks] = useState(0);
   const [pendingReminders, setPendingReminders] = useState(0);
   const [reminders, setReminders] = useState([]);
@@ -37,14 +41,16 @@ const Dashboard = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [showTimerSetup, setShowTimerSetup] = useState(false);
-
   const [deleteHabitId, setDeleteHabitId] = useState(null);
+
+  // Habit calendar
+  const [calendarHabit, setCalendarHabit] = useState(null);
 
   // Forms
   const [newHabitName, setNewHabitName] = useState('');
   const [newTaskText, setNewTaskText] = useState('');
   const [reminderForm, setReminderForm] = useState({ text: '', deadline: '' });
-  const [timerInput, setTimerInput] = useState(60); // minutes
+  const [timerInput, setTimerInput] = useState(60);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -78,7 +84,7 @@ const Dashboard = () => {
       ]);
 
       const [hData, sData, wData, tData, rData] = await Promise.all([
-        hRes.json(), sRes.json(), wRes.json(), tRes.json(), rRes.json()
+        hRes.json(), sRes.json(), wRes.json(), tRes.json(), rRes.json(),
       ]);
 
       if (hData?.success) setHabits(hData.habits || []);
@@ -86,7 +92,7 @@ const Dashboard = () => {
         setStudyStats({
           today: formatHms(sData.totalSeconds),
           totalSeconds: sData.totalSeconds,
-          percentChange: sData.percentChange ?? 0
+          percentChange: sData.percentChange ?? 0,
         });
       }
       if (wData?.success) setBarData(wData.graphData || []);
@@ -204,14 +210,14 @@ const Dashboard = () => {
       setShowLogDialog(false);
       setTimerRunning(false);
 
-      if (mode === 'stopwatch') {
-        setElapsedTime(0);
-      } else {
-        // reset countdown back to full (optional behavior)
-        setElapsedTime(initialTime || 0);
-      }
+      if (mode === 'stopwatch') setElapsedTime(0);
+      else setElapsedTime(initialTime || 0);
 
+      // Refresh dashboard stats
       fetchData();
+
+      // IMPORTANT: tell StudyGoalCard to refresh immediately
+      window.dispatchEvent(new Event('study-session-logged'));
     }
   };
 
@@ -221,7 +227,7 @@ const Dashboard = () => {
 
       <div className="p-4 px-lg-5">
         <h2 className="fw-bold mb-4 mt-3 text-dark">
-          Hello, {user?.name?.split(' ')[0] || 'Student'}!
+          Hello, {user?.name?.split(' ')[0] || 'Student'}! 👋
         </h2>
 
         {/* TOP TILES */}
@@ -241,11 +247,7 @@ const Dashboard = () => {
                 </button>
               </div>
               <h1 className="fw-bold my-3 display-5">{pendingTasks}</h1>
-              <span
-                className="text-primary small fw-bold"
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate('/todo')}
-              >
+              <span className="text-primary small fw-bold" style={{ cursor: 'pointer' }} onClick={() => navigate('/todo')}>
                 View full list &rarr;
               </span>
             </div>
@@ -266,11 +268,7 @@ const Dashboard = () => {
                 </button>
               </div>
               <h1 className="fw-bold my-3 display-5 text-danger">{pendingReminders}</h1>
-              <span
-                className="text-danger small fw-bold"
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate('/todo')}
-              >
+              <span className="text-danger small fw-bold" style={{ cursor: 'pointer' }} onClick={() => navigate('/todo')}>
                 Check deadlines &rarr;
               </span>
             </div>
@@ -322,16 +320,9 @@ const Dashboard = () => {
                 type="button"
                 className={`btn btn-lg rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 ${timerRunning ? 'btn-danger' : 'btn-primary'}`}
                 onClick={() => {
-                  if (mode === 'timer' && elapsedTime === 0) {
-                    setShowTimerSetup(true);
-                    return;
-                  }
-                  if (timerRunning) {
-                    setTimerRunning(false);
-                    setShowLogDialog(true);
-                  } else {
-                    setTimerRunning(true);
-                  }
+                  if (mode === 'timer' && elapsedTime === 0) { setShowTimerSetup(true); return; }
+                  if (timerRunning) { setTimerRunning(false); setShowLogDialog(true); }
+                  else setTimerRunning(true);
                 }}
               >
                 {timerRunning ? <Pause size={20} fill="white" /> : <Play size={20} fill="white" />}
@@ -341,7 +332,12 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* GRAPH + HABITS (THIS WAS MISSING IN YOUR LAST FILE) */}
+        {/* Study Goal Card */}
+        <div className="mb-4">
+          <StudyGoalCard />
+        </div>
+
+        {/* GRAPH + HABITS */}
         <div className="row g-4">
           {/* Graph */}
           <div className="col-lg-8">
@@ -350,7 +346,6 @@ const Dashboard = () => {
                 <h6 className="fw-bold mb-0">Study Activity (Last 7 Days)</h6>
               </div>
 
-              {/* IMPORTANT: ResponsiveContainer needs an explicit-height parent [web:66][web:70] */}
               <div style={{ width: '100%', height: 320 }}>
                 <ResponsiveContainer>
                   <BarChart data={barData}>
@@ -413,38 +408,56 @@ const Dashboard = () => {
                 {habits.length === 0 ? (
                   <p className="text-muted small text-center my-4">No habits yet. Click + to add one.</p>
                 ) : (
-                  habits.map(h => {
-                    const doneToday =
-                      h.lastCompleted &&
-                      new Date(h.lastCompleted).toDateString() === new Date().toDateString();
-
-                    return (
-                      <div key={h._id} className="d-flex justify-content-between align-items-center p-3 border rounded-4 bg-light bg-opacity-10">
-                        <div>
-                          <div className="fw-bold small text-dark">{h.name}</div>
-                          <div className="text-muted" style={{ fontSize: 12 }}>🔥 {h.streak} day streak</div>
+                  habits.map(h => (
+                    <div
+                      key={h._id}
+                      className="d-flex justify-content-between align-items-center p-3 border rounded-4"
+                      style={{ backgroundColor: h.completedToday ? '#f0fdf4' : '#fafafa' }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div className="fw-bold small text-dark text-truncate">
+                          {h.emoji} {h.name}
                         </div>
-                        <div className="d-flex gap-2 align-items-center">
-                          <button
-                            type="button"
-                            className={`btn btn-sm rounded-circle shadow-sm ${doneToday ? 'btn-success' : 'btn-outline-secondary'}`}
-                            onClick={() => handleToggleHabit(h._id)}
-                            title="Mark done"
+                        <div
+                          className="d-flex align-items-center gap-1 mt-1"
+                          style={{ cursor: 'pointer' }}
+                          title="View habit calendar"
+                          onClick={() => setCalendarHabit(h)}
+                        >
+                          <Flame size={13} style={{ color: h.streak > 0 ? '#ea580c' : '#9ca3af' }} />
+                          <span
+                            className="fw-bold"
+                            style={{
+                              fontSize: '12px',
+                              color: h.streak > 0 ? '#ea580c' : '#9ca3af',
+                              textDecoration: 'underline dotted',
+                            }}
                           >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-sm text-danger border-0"
-                            onClick={() => setDeleteHabitId(h._id)}
-                            title="Delete habit"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                            {h.streak} day streak
+                          </span>
                         </div>
                       </div>
-                    );
-                  })
+
+                      <div className="d-flex gap-2 align-items-center ms-2">
+                        <button
+                          type="button"
+                          className={`btn btn-sm rounded-circle shadow-sm ${h.completedToday ? 'btn-success' : 'btn-outline-secondary'}`}
+                          onClick={() => handleToggleHabit(h._id)}
+                          title={h.completedToday ? 'Mark undone' : 'Mark done'}
+                        >
+                          <Check size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm text-danger border-0 bg-transparent"
+                          onClick={() => setDeleteHabitId(h._id)}
+                          title="Delete habit"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
@@ -452,9 +465,14 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Habit Calendar Modal */}
+      {calendarHabit && (
+        <HabitCalendarModal habit={calendarHabit} onClose={() => setCalendarHabit(null)} />
+      )}
+
       {/* TIMER SETUP MODAL */}
       {showTimerSetup && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(5px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(5px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 360 }}>
             <Hourglass size={44} className="text-primary mb-2" />
             <h5 className="fw-bold mb-3">Set Countdown</h5>
@@ -491,7 +509,7 @@ const Dashboard = () => {
 
       {/* LOG MODAL */}
       {showLogDialog && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(5px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(5px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 380 }}>
             <h5 className="fw-bold mb-2">
               Log {formatHms(getTimeStudied?.() ?? 0)}?
@@ -534,7 +552,7 @@ const Dashboard = () => {
 
       {/* ADD HABIT MODAL */}
       {showHabitModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(4px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">New Habit</h5>
             <form onSubmit={handleAddHabit}>
@@ -561,7 +579,7 @@ const Dashboard = () => {
 
       {/* ADD TASK MODAL */}
       {showTaskModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(4px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">Add Task</h5>
             <form onSubmit={handleAddTask}>
@@ -588,7 +606,7 @@ const Dashboard = () => {
 
       {/* ADD REMINDER MODAL */}
       {showReminderModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(4px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">Set Reminder</h5>
             <form onSubmit={handleAddReminder}>
@@ -623,7 +641,7 @@ const Dashboard = () => {
 
       {/* DELETE HABIT MODAL */}
       {deleteHabitId && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3" style={{ backdropFilter: 'blur(4px)' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
           <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 350 }}>
             <AlertCircle size={48} className="text-danger mb-2" />
             <h5 className="fw-bold mb-2">Delete habit?</h5>

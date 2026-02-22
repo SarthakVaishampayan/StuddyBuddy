@@ -10,6 +10,7 @@ import sessionRoutes from "./routes/sessions.js";
 import taskRoutes from "./routes/tasks.js";
 import reminderRoutes from "./routes/reminders.js";
 import subjectRoutes from './routes/subjects.js';
+import dailyGoalRoutes from './routes/dailyGoal.js';
 
 // Configuration
 dotenv.config();
@@ -40,6 +41,7 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/daily-goal', dailyGoalRoutes);
 
 // Health Check Endpoint
 app.get("/api/health", (req, res) => {
