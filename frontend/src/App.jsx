@@ -9,6 +9,7 @@ import Settings   from './pages/Settings';
 import Subjects   from './pages/Subjects';
 import Login      from './pages/Login';
 import Register   from './pages/Register';
+import YourSpace  from './pages/YourSpace';
 import AboutUs    from './pages/AboutUs';
 
 import { AuthProvider, useAuth }                   from './context/AuthContext';
@@ -18,7 +19,6 @@ import NotificationToast                           from './components/Notificati
 
 import { Save, RotateCcw, Trash2, AlertCircle } from 'lucide-react';
 
-// ── Placeholder for pages not yet built ────────────────────────────────────
 const Placeholder = ({ title }) => (
   <div className="p-5 text-center">
     <h1 className="fw-bold text-dark mb-3">{title}</h1>
@@ -29,7 +29,6 @@ const Placeholder = ({ title }) => (
   </div>
 );
 
-// ── Main layout wrapper ─────────────────────────────────────────────────────
 const MainLayout = ({ children }) => {
   const { user } = useAuth();
   return (
@@ -42,7 +41,6 @@ const MainLayout = ({ children }) => {
   );
 };
 
-// ── Protected route guard ───────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) {
@@ -55,7 +53,6 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// ── Global Timer Finish Modal ───────────────────────────────────────────────
 const GlobalTimerFinishModal = () => {
   const { token } = useAuth();
   const {
@@ -132,8 +129,7 @@ const GlobalTimerFinishModal = () => {
               <>
                 <br />
                 Goal:{' '}
-                <span className="fw-bold text-dark">{formatHms(goalSec)}</span>
-                , Remaining:{' '}
+                <span className="fw-bold text-dark">{formatHms(goalSec)}</span>, Remaining:{' '}
                 <span className="fw-bold text-dark">{formatHms(remainingSec)}</span>
               </>
             )}
@@ -156,7 +152,6 @@ const GlobalTimerFinishModal = () => {
   );
 };
 
-// ── App root ────────────────────────────────────────────────────────────────
 function App() {
   return (
     <Router>
@@ -168,23 +163,20 @@ function App() {
               <NotificationToast />
 
               <Routes>
-                {/* Auth */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Protected — real pages */}
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                 <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
                 <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
+                <Route path="/space" element={<ProtectedRoute><YourSpace /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/about" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
 
-                {/* Protected — placeholder (Phase 11) */}
                 <Route path="/chats" element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
 
-                {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </MainLayout>

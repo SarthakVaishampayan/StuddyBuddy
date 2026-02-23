@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, BookOpen, Book,
   MessageSquare, LogOut, User,
-  ChevronLeft, ChevronRight, Info
+  ChevronLeft, ChevronRight, Info, Sparkles
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -17,6 +17,10 @@ const Sidebar = () => {
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
     { name: 'Analytics', icon: <BookOpen size={20} />,        path: '/analytics' },
     { name: 'Subjects',  icon: <Book size={20} />,            path: '/subjects' },
+
+    // NEW
+    { name: 'Your Space', icon: <Sparkles size={20} />,       path: '/space' },
+
     { name: 'Chats',     icon: <MessageSquare size={20} />,   path: '/chats' },
   ];
 
@@ -31,7 +35,6 @@ const Sidebar = () => {
         flexShrink: 0,
       }}
     >
-      {/* Collapse Toggle */}
       <div className="p-3 d-flex justify-content-end">
         <button
           className="btn btn-sm btn-light rounded-circle"
@@ -41,7 +44,6 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Logo */}
       <div
         className={`px-4 mb-4 d-flex align-items-center gap-2 ${
           isCollapsed ? 'justify-content-center' : ''
@@ -53,7 +55,6 @@ const Sidebar = () => {
         {!isCollapsed && <h5 className="mb-0 fw-bold">StudyBuddy</h5>}
       </div>
 
-      {/* Menu Items */}
       <div className="flex-grow-1 mt-2">
         {menuItems.map((item, idx) => (
           <div
@@ -73,9 +74,7 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* Bottom Section */}
       <div className="p-4 border-top">
-        {/* Profile */}
         <div
           className={`d-flex align-items-center gap-3 ${
             isCollapsed ? 'justify-content-center px-0' : ''
@@ -94,7 +93,6 @@ const Sidebar = () => {
           )}
         </div>
 
-        {/* About Us (between profile and logout) */}
         <div
           className={`d-flex align-items-center gap-3 mt-3 ${
             isCollapsed ? 'justify-content-center px-0' : ''
@@ -114,7 +112,6 @@ const Sidebar = () => {
           )}
         </div>
 
-        {/* Logout */}
         {!isCollapsed && (
           <div
             className="mt-3 text-danger small d-flex align-items-center gap-2"

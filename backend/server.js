@@ -11,7 +11,8 @@ import taskRoutes from "./routes/tasks.js";
 import reminderRoutes from "./routes/reminders.js";
 import subjectRoutes from "./routes/subjects.js";
 import dailyGoalRoutes from "./routes/dailyGoal.js";
-import contactRoutes from "./routes/contact.js";
+import marksRoutes from "./routes/marks.js";
+import linksRoutes from "./routes/links.js";
 
 dotenv.config();
 const app = express();
@@ -44,10 +45,11 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/daily-goal", dailyGoalRoutes);
-app.use("/api/contact", contactRoutes);
 
+// NEW
+app.use("/api/marks", marksRoutes);
+app.use("/api/links", linksRoutes);
 
-// Health Check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "online",
