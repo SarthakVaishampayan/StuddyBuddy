@@ -1,8 +1,7 @@
-// File: StudyBuddy/frontend/src/components/Sidebar.jsx
 import {
   LayoutDashboard, BookOpen, Book,
   MessageSquare, LogOut, User,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Info
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -74,16 +73,15 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* Profile Section */}
-      <div
-        className="p-4 border-top"
-        style={{ cursor: 'pointer' }}
-        onClick={() => navigate('/profile')}
-      >
+      {/* Bottom Section */}
+      <div className="p-4 border-top">
+        {/* Profile */}
         <div
           className={`d-flex align-items-center gap-3 ${
             isCollapsed ? 'justify-content-center px-0' : ''
           }`}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/profile')}
         >
           <div className="bg-light rounded-circle p-2 border">
             <User size={20} className="text-primary" />
@@ -96,6 +94,27 @@ const Sidebar = () => {
           )}
         </div>
 
+        {/* About Us (between profile and logout) */}
+        <div
+          className={`d-flex align-items-center gap-3 mt-3 ${
+            isCollapsed ? 'justify-content-center px-0' : ''
+          }`}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/about')}
+          title={isCollapsed ? 'About Us' : ''}
+        >
+          <div className="bg-light rounded-circle p-2 border">
+            <Info size={18} className="text-secondary" />
+          </div>
+          {!isCollapsed && (
+            <div>
+              <p className="mb-0 fw-bold small text-dark">About Us</p>
+              <p className="mb-0 text-muted" style={{ fontSize: '11px' }}>Developer & contact</p>
+            </div>
+          )}
+        </div>
+
+        {/* Logout */}
         {!isCollapsed && (
           <div
             className="mt-3 text-danger small d-flex align-items-center gap-2"

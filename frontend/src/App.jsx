@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Sidebar    from './components/Sidebar';
@@ -10,6 +9,7 @@ import Settings   from './pages/Settings';
 import Subjects   from './pages/Subjects';
 import Login      from './pages/Login';
 import Register   from './pages/Register';
+import AboutUs    from './pages/AboutUs';
 
 import { AuthProvider, useAuth }                   from './context/AuthContext';
 import { TimerProvider, useTimer }                 from './context/TimerContext';
@@ -86,10 +86,10 @@ const GlobalTimerFinishModal = () => {
     }
     try {
       const res = await fetch('http://localhost:5000/api/sessions', {
-        method:  'POST',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization:  `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ durationInSeconds: studied }),
       });
@@ -107,9 +107,9 @@ const GlobalTimerFinishModal = () => {
 
   if (!sessionEnded) return null;
 
-  const studiedSec   = getTimeStudied();
-  const remainingSec = mode === 'timer' ? elapsedTime   : null;
-  const goalSec      = mode === 'timer' ? initialTime   : null;
+  const studiedSec = getTimeStudied();
+  const remainingSec = mode === 'timer' ? elapsedTime : null;
+  const goalSec = mode === 'timer' ? initialTime : null;
 
   return (
     <div
@@ -141,25 +141,13 @@ const GlobalTimerFinishModal = () => {
         </div>
 
         <div className="d-grid gap-2">
-          <button
-            className="btn btn-primary py-2 fw-bold rounded-3"
-            onClick={handleLog}
-            type="button"
-          >
+          <button className="btn btn-primary py-2 fw-bold rounded-3" onClick={handleLog} type="button">
             <Save className="me-2" size={18} /> Log time
           </button>
-          <button
-            className="btn btn-outline-secondary py-2 fw-bold rounded-3"
-            onClick={restartSession}
-            type="button"
-          >
+          <button className="btn btn-outline-secondary py-2 fw-bold rounded-3" onClick={restartSession} type="button">
             <RotateCcw className="me-2" size={18} /> Restart
           </button>
-          <button
-            className="btn btn-light py-2 fw-bold rounded-3 text-danger"
-            onClick={discardSession}
-            type="button"
-          >
+          <button className="btn btn-light py-2 fw-bold rounded-3 text-danger" onClick={discardSession} type="button">
             <Trash2 className="me-2" size={18} /> Discard
           </button>
         </div>
@@ -181,22 +169,23 @@ function App() {
 
               <Routes>
                 {/* Auth */}
-                <Route path="/login"    element={<Login />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
                 {/* Protected — real pages */}
-                <Route path="/"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/analytics"element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                <Route path="/todo"     element={<ProtectedRoute><Todo /></ProtectedRoute>} />
+                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
                 <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
-                <Route path="/profile"  element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="/about" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
 
                 {/* Protected — placeholder (Phase 11) */}
-                <Route path="/chats"    element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
+                <Route path="/chats" element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
 
                 {/* Fallback */}
-                <Route path="*"         element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </MainLayout>
           </NotificationProvider>
