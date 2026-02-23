@@ -7,15 +7,13 @@ const notificationReducer = (state, action) => {
     case 'ADD':
       return {
         ...state,
-        toasts: [
-          { id: Date.now(), ...action.payload },
-          ...state.toasts,
-        ],
+        // keep the ID generated in showNotification
+        toasts: [action.payload, ...state.toasts],
       };
     case 'REMOVE':
       return {
         ...state,
-        toasts: state.toasts.filter(t => t.id !== action.payload.id),
+        toasts: state.toasts.filter((t) => t.id !== action.payload.id),
       };
     default:
       return state;
@@ -36,7 +34,7 @@ export const NotificationProvider = ({ children }) => {
       autoClose,
       createdAt: Date.now(),
     };
-    dispatch({ type: 'ADD', payload: { ...toast } });
+    dispatch({ type: 'ADD', payload: toast });
   };
 
   const removeToast = (id) => {

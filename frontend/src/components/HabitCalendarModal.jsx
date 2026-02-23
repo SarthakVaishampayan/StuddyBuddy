@@ -1,7 +1,7 @@
-// File: StudyBuddy/frontend/src/components/HabitCalendarModal.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { yyyyMmDdLocal } from '../utils/date';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -16,6 +16,8 @@ const HabitCalendarModal = ({ habit, onClose }) => {
   const [year,  setYear]  = useState(new Date().getFullYear());
   const [completedDates, setCompletedDates] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const todayStr = yyyyMmDdLocal();
 
   useEffect(() => {
     if (!habit) return;
@@ -38,24 +40,21 @@ const HabitCalendarModal = ({ habit, onClose }) => {
   }, [habit, month, year, token]);
 
   const prevMonth = () => {
-    if (month === 1) { setMonth(12); setYear(y => y - 1); }
-    else setMonth(m => m - 1);
+    if (month === 1) { setMonth(12); setYear((y) => y - 1); }
+    else setMonth((m) => m - 1);
   };
 
   const nextMonth = () => {
-    if (month === 12) { setMonth(1); setYear(y => y + 1); }
-    else setMonth(m => m + 1);
+    if (month === 12) { setMonth(1); setYear((y) => y + 1); }
+    else setMonth((m) => m + 1);
   };
 
-  // Build calendar grid
   const daysInMonth  = new Date(year, month, 0).getDate();
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
-  const todayStr     = new Date().toISOString().split('T')[0];
 
   const cells = [];
-  // Empty cells before first day
   for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
-  // Day cells
+
   for (let d = 1; d <= daysInMonth; d++) {
     const mm   = String(month).padStart(2, '0');
     const dd   = String(d).padStart(2, '0');
@@ -74,6 +73,11 @@ const HabitCalendarModal = ({ habit, onClose }) => {
     ? Math.round((completedCount / daysInMonth) * 100)
     : 0;
 
+  // prevent navigating beyond current month
+  const currentYm = new Date().getFullYear() * 12 + (new Date().getMonth() + 1);
+  const selectedYm = year * 12 + month;
+  const disableNext = selectedYm >= currentYm;
+
   if (!habit) return null;
 
   return (
@@ -85,7 +89,7 @@ const HabitCalendarModal = ({ habit, onClose }) => {
       <div
         className="bg-white rounded-4 shadow-lg p-4"
         style={{ width: '420px', maxWidth: '95vw' }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -115,7 +119,7 @@ const HabitCalendarModal = ({ habit, onClose }) => {
           <button
             className="btn btn-sm btn-light rounded-circle"
             onClick={nextMonth}
-            disabled={`${year}-${String(month).padStart(2,'0')}` >= `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`}
+            disabled={disableNext}
           >
             <ChevronRight size={18} />
           </button>
@@ -123,7 +127,7 @@ const HabitCalendarModal = ({ habit, onClose }) => {
 
         {/* Day Headers */}
         <div className="d-grid mb-2" style={{ gridTemplateColumns: 'repeat(7, 1fr)', display: 'grid' }}>
-          {DAYS.map(d => (
+          {DAYS.map((d) => (
             <div key={d} className="text-center text-muted fw-bold" style={{ fontSize: '11px', padding: '4px 0' }}>
               {d}
             </div>

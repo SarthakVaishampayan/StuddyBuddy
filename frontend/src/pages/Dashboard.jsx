@@ -6,6 +6,7 @@ import StudyGoalCard from '../components/StudyGoalCard';
 import HabitCalendarModal from '../components/HabitCalendarModal';
 import { useAuth } from '../context/AuthContext';
 import { useTimer } from '../context/TimerContext';
+import { yyyyMmDdLocal } from '../utils/date';
 import {
   Play, Pause, Save, RotateCcw, Check, Plus, Trash2,
   Calendar, AlertCircle, Clock, Hourglass, Flame
