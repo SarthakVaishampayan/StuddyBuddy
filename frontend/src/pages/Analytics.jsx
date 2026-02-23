@@ -3,78 +3,103 @@ import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLiveLocalDay, yyyyMmDdLocal } from '../utils/date';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
-import { Clock, Calendar, Flame, Target, TrendingUp } from 'lucide-react';
+import { Clock, Calendar, Flame, TrendingUp } from 'lucide-react';
 
 const Analytics = () => {
-  const { token }    = useAuth();
+  const { token } = useAuth();
   const { notifyInfo } = useNotification();
 
-  const [loading,       setLoading]       = useState(true);
-  const [reminders,     setReminders]     = useState([]);
-  const [weeklyData,    setWeeklyData]    = useState([]);
-  const [totalSec,      setTotalSec]      = useState(0);
-  const [goalStreak,    setGoalStreak]    = useState(0);
+  // Live day (YYYY-MM-DD) so page updates after midnight without refresh
+  const liveDay = useLiveLocalDay();
+
+  const [loading, setLoading] = useState(true);
+  const [reminders, setReminders] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [totalSec, setTotalSec] = useState(0);
+  const [goalStreak, setGoalStreak] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
-  const [goalWeekly,    setGoalWeekly]    = useState([]);
-  const [habitRate,     setHabitRate]     = useState(0);
+  const [goalWeekly, setGoalWeekly] = useState([]);
+  const [habitRate, setHabitRate] = useState(0);
 
   const formatHms = (sec) => {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+    const s = Math.max(0, Number(sec) || 0);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const r = s % 60;
+    return h > 0 ? `${h}h ${m}m ${r}s` : `${m}m ${r}s`;
   };
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const headers = { Authorization: `Bearer ${token}` };
 
       const [wRes, rRes, sRes, gwRes, hRes] = await Promise.all([
-        fetch('http://localhost:5000/api/sessions/weekly-stats',  { headers }),
-        fetch('http://localhost:5000/api/reminders',              { headers }),
-        fetch('http://localhost:5000/api/daily-goal/streak',      { headers }),
-        fetch('http://localhost:5000/api/daily-goal/weekly',      { headers }),
-        fetch('http://localhost:5000/api/habits',                 { headers }),
+        fetch('http://localhost:5000/api/sessions/weekly-stats', { headers }),
+        fetch('http://localhost:5000/api/reminders', { headers }),
+        fetch('http://localhost:5000/api/daily-goal/streak', { headers }),
+        fetch('http://localhost:5000/api/daily-goal/weekly', { headers }),
+        fetch('http://localhost:5000/api/habits', { headers }),
       ]);
 
       const [wData, rData, sData, gwData, hData] = await Promise.all([
         wRes.json(), rRes.json(), sRes.json(), gwRes.json(), hRes.json(),
       ]);
 
-      if (wData?.success) {
+      if (wData?.success && Array.isArray(wData.graphData)) {
         setWeeklyData(wData.graphData);
-        setTotalSec(wData.graphData.reduce((acc, d) => acc + d.rawSeconds, 0));
+        setTotalSec(wData.graphData.reduce((acc, d) => acc + (d.rawSeconds || 0), 0));
+      } else {
+        setWeeklyData([]);
+        setTotalSec(0);
       }
-      if (rData?.success)  setReminders(rData.reminders);
+
+      if (rData?.success) setReminders(rData.reminders || []);
+      else setReminders([]);
+
       if (sData?.success) {
-        setGoalStreak(sData.streak);
-        setLongestStreak(sData.longestStreak);
+        setGoalStreak(sData.streak ?? 0);
+        setLongestStreak(sData.longestStreak ?? 0);
+      } else {
+        setGoalStreak(0);
+        setLongestStreak(0);
       }
-      if (gwData?.success) setGoalWeekly(gwData.days);
+
+      if (gwData?.success) setGoalWeekly(gwData.days || []);
+      else setGoalWeekly([]);
 
       // Habit completion rate — avg % of habits completed per day this week
-      if (hData?.success && hData.habits.length > 0) {
-        const totalHabits = hData.habits.length;
-        // Count how many habits have been completed in last 7 days
+      if (hData?.success && Array.isArray(hData.habits) && hData.habits.length > 0) {
+        const habits = hData.habits;
+        const totalHabits = habits.length;
+
         const today = new Date();
         let totalPossible = 0;
         let totalDone = 0;
+
         for (let i = 0; i < 7; i++) {
           const d = new Date(today);
           d.setDate(d.getDate() - i);
-          const ds = d.toISOString().split('T')[0];
+          const ds = yyyyMmDdLocal(d);
+
           totalPossible += totalHabits;
-          hData.habits.forEach(h => {
-            if (h.completedDates?.some(cd =>
-              new Date(cd).toISOString().split('T')[0] === ds
-            )) totalDone++;
+
+          habits.forEach((h) => {
+            // backend returns completedDates as Date objects or strings; normalize safely
+            const cds = Array.isArray(h.completedDates) ? h.completedDates : [];
+            const doneThatDay = cds.some((cd) => yyyyMmDdLocal(new Date(cd)) === ds);
+            if (doneThatDay) totalDone += 1;
           });
         }
+
         setHabitRate(totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0);
+      } else {
+        setHabitRate(0);
       }
     } catch (err) {
       console.error(err);
@@ -86,7 +111,8 @@ const Analytics = () => {
 
   useEffect(() => {
     if (token) fetchData();
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, liveDay]);
 
   if (loading) {
     return (
@@ -96,7 +122,7 @@ const Analytics = () => {
     );
   }
 
-  const streakDays = weeklyData.filter(d => d.rawSeconds > 0).length;
+  const streakDays = weeklyData.filter(d => (d.rawSeconds || 0) > 0).length;
 
   return (
     <div className="bg-light min-vh-100 pb-5">
@@ -105,7 +131,6 @@ const Analytics = () => {
       <div className="p-4 px-lg-5">
         <h2 className="fw-bold mb-4 mt-3">Study Insights</h2>
 
-        {/* ── Stat Cards Row ── */}
         <div className="row g-3 mb-4">
           <div className="col-md-3">
             <div className="bg-white p-4 rounded-4 border shadow-sm">
@@ -154,7 +179,6 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* ── Weekly Focus Chart ── */}
         <div className="bg-white p-4 rounded-4 border shadow-sm mb-4">
           <h6 className="fw-bold mb-4">Focus Duration Trend (Hours)</h6>
           <div style={{ width: '100%', height: 300 }}>
@@ -181,7 +205,7 @@ const Analytics = () => {
                 <Tooltip
                   cursor={{ fill: '#f9fafb' }}
                   content={({ active, payload }) =>
-                    active && payload ? (
+                    active && payload && payload.length ? (
                       <div className="bg-white p-3 border rounded-3 shadow-sm small">
                         <div className="fw-bold text-dark">
                           {payload[0].payload.day}, {payload[0].payload.date}
@@ -193,8 +217,8 @@ const Analytics = () => {
                     ) : null
                   }
                 />
-                <Bar dataKey="hours" radius={[6,6,0,0]} barSize={40}>
-                  {weeklyData.map((entry, index) => (
+                <Bar dataKey="hours" radius={[6, 6, 0, 0]} barSize={40}>
+                  {weeklyData.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={index === weeklyData.length - 1 ? '#8b5cf6' : '#ddd6fe'}
@@ -206,8 +230,7 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* ── Goal vs Actual Chart ── */}
-        {goalWeekly.length > 0 && goalWeekly.some(d => d.goalSeconds > 0) && (
+        {goalWeekly.length > 0 && goalWeekly.some(d => (d.goalSeconds || 0) > 0) && (
           <div className="bg-white p-4 rounded-4 border shadow-sm">
             <h6 className="fw-bold mb-1">Goal vs Actual Study Time</h6>
             <p className="text-muted small mb-4">
@@ -227,7 +250,7 @@ const Analytics = () => {
                   />
                   <Tooltip
                     content={({ active, payload, label }) =>
-                      active && payload ? (
+                      active && payload && payload.length ? (
                         <div className="bg-white p-3 border rounded-3 shadow-sm small">
                           <div className="fw-bold mb-1">{label}</div>
                           {payload.map((p, i) => (
@@ -246,8 +269,8 @@ const Analytics = () => {
                       <span style={{ fontSize: '12px', color: '#6b7280' }}>{value}</span>
                     )}
                   />
-                  <Bar dataKey="goalHours"   name="Goal"   fill="#ddd6fe" radius={[4,4,0,0]} barSize={28} />
-                  <Bar dataKey="loggedHours" name="Actual" fill="#8b5cf6" radius={[4,4,0,0]} barSize={28} />
+                  <Bar dataKey="goalHours" name="Goal" fill="#ddd6fe" radius={[4, 4, 0, 0]} barSize={28} />
+                  <Bar dataKey="loggedHours" name="Actual" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={28} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

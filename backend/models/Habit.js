@@ -7,45 +7,43 @@ const habitSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  name:  { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true },
   emoji: { type: String, default: '⭐' },
   color: { type: String, default: '#8b5cf6' },
-  completedDates: [{ type: Date }], // stores each date habit was completed
+  completedDates: [{ type: Date }],
 }, { timestamps: true });
 
-// ── Dynamic streak calculation (called as a method) ─────────────────────────
-habitSchema.methods.calculateStreak = function () {
-  if (!this.completedDates.length) return 0;
+// Local YYYY-MM-DD (server local timezone)
+const yyyyMmDdLocal = (d = new Date()) => {
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0, 10);
+};
 
-  // Normalize all completed dates to YYYY-MM-DD strings
+// ── Dynamic streak calculation ─────────────────────────────────────────
+habitSchema.methods.calculateStreak = function () {
+  if (!this.completedDates?.length) return 0;
+
   const doneDates = new Set(
-    this.completedDates.map(d => new Date(d).toISOString().split('T')[0])
+    this.completedDates.map((d) => yyyyMmDdLocal(d))
   );
 
-  const today     = new Date();
-  const todayStr  = today.toISOString().split('T')[0];
+  const today = new Date();
+  const todayStr = yyyyMmDdLocal(today);
 
-  // If today is not done, check if yesterday was done
-  // If yesterday is also not done → streak is 0
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yesterdayStr = yyyyMmDdLocal(yesterday);
 
-  // Start counting from today if done, else from yesterday
   let checkFrom;
-  if (doneDates.has(todayStr)) {
-    checkFrom = new Date(today);
-  } else if (doneDates.has(yesterdayStr)) {
-    checkFrom = new Date(yesterday);
-  } else {
-    return 0; // streak broken
-  }
+  if (doneDates.has(todayStr)) checkFrom = new Date(today);
+  else if (doneDates.has(yesterdayStr)) checkFrom = new Date(yesterday);
+  else return 0;
 
-  // Walk backwards counting consecutive days
   let streak = 0;
   const cursor = new Date(checkFrom);
   while (true) {
-    const dateStr = cursor.toISOString().split('T')[0];
+    const dateStr = yyyyMmDdLocal(cursor);
     if (doneDates.has(dateStr)) {
       streak++;
       cursor.setDate(cursor.getDate() - 1);

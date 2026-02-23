@@ -6,15 +6,22 @@ import { protectRoute } from './auth.js';
 
 const router = express.Router();
 
-const todayStr = () => new Date().toISOString().split('T')[0];
+// Local YYYY-MM-DD helper (Node-safe, no React, no Date methods)
+const yyyyMmDdLocal = (d = new Date()) => {
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0, 10);
+};
+
+const todayStr = () => yyyyMmDdLocal(new Date());
 
 const parseMonthYear = (month, year) => {
-  const m = Math.min(12, Math.max(1, parseInt(month || '0', 10) || 0));
+  const m = Math.min(12, Math.max(1, parseInt(month || '0', 10) || new Date().getMonth() + 1));
   const y = parseInt(year || '0', 10) || new Date().getFullYear();
   return { m, y };
 };
 
-// POST set a goal for a specific date
+// POST /api/daily-goal — set goal for a specific date
 router.post('/', protectRoute, async (req, res) => {
   try {
     const { goalSeconds, targetDate } = req.body;
@@ -38,14 +45,15 @@ router.post('/', protectRoute, async (req, res) => {
   }
 });
 
-// GET goal for a specific date (/day?date=YYYY-MM-DD)
+// GET /api/daily-goal/day?date=YYYY-MM-DD
 router.get('/day', protectRoute, async (req, res) => {
   try {
     const dateQuery = req.query.date || todayStr();
     const goal = await DailyGoal.findOne({ user: req.user.userId, date: dateQuery });
 
-    const startOfDay = new Date(`${dateQuery}T00:00:00.000Z`);
-    const endOfDay = new Date(`${dateQuery}T23:59:59.999Z`);
+    // Use local midnight boundaries (not UTC) so sessions match IST day
+    const startOfDay = new Date(`${dateQuery}T00:00:00`);
+    const endOfDay   = new Date(`${dateQuery}T23:59:59.999`);
 
     const sessions = await StudySession.find({
       user: req.user.userId,
@@ -61,7 +69,9 @@ router.get('/day', protectRoute, async (req, res) => {
 
     res.json({
       success: true,
-      goal: goal ? { goalSeconds: goal.goalSeconds, achieved: goal.achieved, date: goal.date } : null,
+      goal: goal
+        ? { goalSeconds: goal.goalSeconds, achieved: goal.achieved, date: goal.date }
+        : null,
       loggedSeconds,
     });
   } catch (err) {
@@ -70,17 +80,14 @@ router.get('/day', protectRoute, async (req, res) => {
   }
 });
 
-// GET dates in a month that have a goal set (for calendar highlights)
-// /month?month=2&year=2026  => ["2026-02-01","2026-02-10",...]
+// GET /api/daily-goal/month?month=2&year=2026
 router.get('/month', protectRoute, async (req, res) => {
   try {
     const { m, y } = parseMonthYear(req.query.month, req.query.year);
 
-    const start = new Date(Date.UTC(y, m - 1, 1));
-    const end = new Date(Date.UTC(y, m, 1)); // next month
-
-    const startStr = start.toISOString().split('T')[0];
-    const endStr = end.toISOString().split('T')[0];
+    // Build start/end as local date strings
+    const startStr = yyyyMmDdLocal(new Date(y, m - 1, 1));
+    const endStr   = yyyyMmDdLocal(new Date(y, m, 1));
 
     const goals = await DailyGoal.find({
       user: req.user.userId,
@@ -95,14 +102,14 @@ router.get('/month', protectRoute, async (req, res) => {
   }
 });
 
-// GET today's goal (kept for compatibility if any page still calls it)
+// GET /api/daily-goal/today (kept for compatibility)
 router.get('/today', protectRoute, async (req, res) => {
   try {
     const today = todayStr();
-    const goal = await DailyGoal.findOne({ user: req.user.userId, date: today });
+    const goal  = await DailyGoal.findOne({ user: req.user.userId, date: today });
 
-    const startOfDay = new Date(`${today}T00:00:00.000Z`);
-    const endOfDay = new Date(`${today}T23:59:59.999Z`);
+    const startOfDay = new Date(`${today}T00:00:00`);
+    const endOfDay   = new Date(`${today}T23:59:59.999`);
 
     const sessions = await StudySession.find({
       user: req.user.userId,
@@ -118,7 +125,9 @@ router.get('/today', protectRoute, async (req, res) => {
 
     res.json({
       success: true,
-      goal: goal ? { goalSeconds: goal.goalSeconds, achieved: goal.achieved, date: goal.date } : null,
+      goal: goal
+        ? { goalSeconds: goal.goalSeconds, achieved: goal.achieved, date: goal.date }
+        : null,
       loggedSeconds,
     });
   } catch (err) {
@@ -127,7 +136,7 @@ router.get('/today', protectRoute, async (req, res) => {
   }
 });
 
-// GET streak + longest streak
+// GET /api/daily-goal/streak
 router.get('/streak', protectRoute, async (req, res) => {
   try {
     const goals = await DailyGoal.find({
@@ -137,24 +146,30 @@ router.get('/streak', protectRoute, async (req, res) => {
 
     if (!goals.length) return res.json({ success: true, streak: 0, longestStreak: 0 });
 
-    const doneDates = new Set(goals.map(g => g.date));
+    const doneDates  = new Set(goals.map(g => g.date));
+    const today      = todayStr();
 
-    const today = todayStr();
-    const y = new Date();
-    y.setDate(y.getDate() - 1);
-    const yesterdayStr = y.toISOString().split('T')[0];
+    const yd = new Date();
+    yd.setDate(yd.getDate() - 1);
+    const yesterdayStr = yyyyMmDdLocal(yd);
+
+    let checkFrom = doneDates.has(today)
+      ? today
+      : doneDates.has(yesterdayStr)
+      ? yesterdayStr
+      : null;
 
     let streak = 0;
-    let checkFrom = doneDates.has(today) ? today : (doneDates.has(yesterdayStr) ? yesterdayStr : null);
-
     if (checkFrom) {
-      const cursor = new Date(checkFrom);
+      const cursor = new Date(`${checkFrom}T00:00:00`);
       while (true) {
-        const ds = cursor.toISOString().split('T')[0];
+        const ds = yyyyMmDdLocal(cursor);
         if (doneDates.has(ds)) {
           streak++;
           cursor.setDate(cursor.getDate() - 1);
-        } else break;
+        } else {
+          break;
+        }
       }
     }
 
@@ -165,7 +180,7 @@ router.get('/streak', protectRoute, async (req, res) => {
       const prev = new Date(sortedDates[i - 1]);
       const curr = new Date(sortedDates[i]);
       const diff = (curr - prev) / (1000 * 60 * 60 * 24);
-      if (diff === 1) {
+      if (Math.round(diff) === 1) {
         current++;
         longest = Math.max(longest, current);
       } else {
@@ -181,7 +196,7 @@ router.get('/streak', protectRoute, async (req, res) => {
   }
 });
 
-// weekly endpoint unchanged
+// GET /api/daily-goal/weekly  ← THIS is what the Analytics "Goal vs Actual" graph uses
 router.get('/weekly', protectRoute, async (req, res) => {
   try {
     const days = [];
@@ -189,12 +204,13 @@ router.get('/weekly', protectRoute, async (req, res) => {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = yyyyMmDdLocal(d);  // FIX: was d.useLiveLocalDay()
 
       const goal = await DailyGoal.findOne({ user: req.user.userId, date: dateStr });
 
-      const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
-      const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
+      // Local midnight boundaries
+      const startOfDay = new Date(`${dateStr}T00:00:00`);
+      const endOfDay   = new Date(`${dateStr}T23:59:59.999`);
 
       const sessions = await StudySession.find({
         user: req.user.userId,
@@ -204,13 +220,13 @@ router.get('/weekly', protectRoute, async (req, res) => {
       const loggedSeconds = sessions.reduce((acc, s) => acc + s.durationInSeconds, 0);
 
       days.push({
-        date: dateStr,
-        day: d.toLocaleDateString('en-IN', { weekday: 'short' }),
+        date:        dateStr,
+        day:         d.toLocaleDateString('en-IN', { weekday: 'short' }),
         goalSeconds: goal ? goal.goalSeconds : 0,
-        goalHours: goal ? +(goal.goalSeconds / 3600).toFixed(2) : 0,
+        goalHours:   goal ? +(goal.goalSeconds / 3600).toFixed(2) : 0,
         loggedSeconds,
         loggedHours: +(loggedSeconds / 3600).toFixed(2),
-        achieved: goal ? goal.achieved : false,
+        achieved:    goal ? goal.achieved : false,
       });
     }
 

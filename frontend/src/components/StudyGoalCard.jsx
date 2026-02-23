@@ -1,8 +1,18 @@
 // File: StudyBuddy/frontend/src/components/StudyGoalCard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLiveLocalDay } from '../utils/date';
 import { useNotification } from '../context/NotificationContext';
-import { Target, Flame, CheckCircle, CalendarDays, Timer, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import {
+  Target,
+  Flame,
+  CheckCircle,
+  CalendarDays,
+  Timer,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from 'lucide-react';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -14,9 +24,15 @@ const StudyGoalCard = () => {
   const { token } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
-  const today = new Date().toISOString().split('T')[0];
+  // LIVE "today" string that flips at midnight local time
+  const today = useLiveLocalDay();
 
   const [selectedDate, setSelectedDate] = useState(today);
+
+  // If the day flips and user had selected "today", keep it on the new today
+  useEffect(() => {
+    setSelectedDate((prev) => (prev === today ? today : prev));
+  }, [today]);
 
   const [goal, setGoal] = useState(null);
   const [loggedSeconds, setLoggedSeconds] = useState(0);
@@ -34,7 +50,7 @@ const StudyGoalCard = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1); // 1-12
   const [calYear, setCalYear] = useState(new Date().getFullYear());
-  const [goalDates, setGoalDates] = useState(new Set()); // dates in YYYY-MM-DD for month that have a goal
+  const [goalDates, setGoalDates] = useState(new Set());
 
   // ---------- Helpers ----------
   const formatTime = (sec) => {
@@ -106,11 +122,8 @@ const StudyGoalCard = () => {
       const headers = { Authorization: `Bearer ${token}` };
       const res = await fetch(`http://localhost:5000/api/daily-goal/month?month=${month}&year=${year}`, { headers });
       const data = await res.json();
-      if (data?.success) {
-        setGoalDates(new Set(data.dates || []));
-      } else {
-        setGoalDates(new Set());
-      }
+      if (data?.success) setGoalDates(new Set(data.dates || []));
+      else setGoalDates(new Set());
     } catch (err) {
       console.error('fetchMonthGoals error:', err);
       setGoalDates(new Set());
@@ -120,6 +133,11 @@ const StudyGoalCard = () => {
   useEffect(() => {
     fetchForDate(selectedDate);
   }, [selectedDate, fetchForDate]);
+
+  // If today flips and user is viewing today, refresh silently
+  useEffect(() => {
+    if (selectedDate === today) fetchForDate(today, { silent: true });
+  }, [today, selectedDate, fetchForDate]);
 
   // Instant update when session is logged from Dashboard
   useEffect(() => {
@@ -140,7 +158,6 @@ const StudyGoalCard = () => {
     };
   }, [fetchForDate, selectedDate]);
 
-  // When calendar opens or month changes, load the highlight set
   useEffect(() => {
     if (showCalendar) fetchMonthGoals(calMonth, calYear);
   }, [showCalendar, calMonth, calYear, fetchMonthGoals]);
@@ -186,8 +203,6 @@ const StudyGoalCard = () => {
       setInputM('');
 
       await fetchForDate(selectedDate, { silent: true });
-
-      // refresh highlights for current calendar month if open
       if (showCalendar) fetchMonthGoals(calMonth, calYear);
     } catch (err) {
       console.error(err);
@@ -199,11 +214,7 @@ const StudyGoalCard = () => {
   };
 
   const hasGoal = !!goal && goal.goalSeconds > 0;
-  const percent = hasGoal
-    ? Math.min(100, Math.round((loggedSeconds / goal.goalSeconds) * 100))
-    : 0;
-
-  const primaryCtaText = hasGoal ? 'Update Goal' : 'Set Goal';
+  const percent = hasGoal ? Math.min(100, Math.round((loggedSeconds / goal.goalSeconds) * 100)) : 0;
 
   // ----- Calendar Grid -----
   const daysInMonth = new Date(calYear, calMonth, 0).getDate();
@@ -238,15 +249,10 @@ const StudyGoalCard = () => {
 
   return (
     <div className="bg-white rounded-4 shadow-sm border p-4 position-relative">
-      {/* Loading overlay */}
-      {(loading) && (
+      {loading && (
         <div
           className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-4"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.65)',
-            backdropFilter: 'blur(2px)',
-            zIndex: 5,
-          }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(2px)', zIndex: 5 }}
         >
           <div className="d-flex align-items-center gap-2 bg-white border shadow-sm rounded-pill px-3 py-2">
             <div className="spinner-border spinner-border-sm text-primary" role="status" />
@@ -255,7 +261,6 @@ const StudyGoalCard = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3" style={{ position: 'relative', zIndex: 1 }}>
         <div className="d-flex align-items-center gap-2">
           <div className="bg-primary bg-opacity-10 p-2 rounded-3">
@@ -280,7 +285,6 @@ const StudyGoalCard = () => {
       </div>
 
       <div className="row g-3 align-items-start" style={{ position: 'relative', zIndex: 1 }}>
-        {/* Left: Progress */}
         <div className="col-lg-7">
           <div className="p-3 rounded-4 border" style={{ background: 'linear-gradient(180deg, #fafafa 0%, #ffffff 100%)' }}>
             <div className="d-flex justify-content-between align-items-start mb-2">
@@ -298,7 +302,7 @@ const StudyGoalCard = () => {
                 </div>
               </div>
 
-              {hasGoal && goal.achieved && (
+              {hasGoal && goal?.achieved && (
                 <span
                   className="badge rounded-pill px-3 py-2"
                   style={{
@@ -320,7 +324,7 @@ const StudyGoalCard = () => {
                 className="progress-bar rounded-pill"
                 style={{
                   width: `${percent}%`,
-                  background: hasGoal && goal.achieved
+                  background: hasGoal && goal?.achieved
                     ? 'linear-gradient(90deg, #10b981 0%, #34d399 100%)'
                     : 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
                   transition: 'width 0.5s ease',
@@ -329,7 +333,7 @@ const StudyGoalCard = () => {
             </div>
 
             <div className="d-flex justify-content-between align-items-center">
-              <span className="fw-bold" style={{ fontSize: '13px', color: hasGoal && goal.achieved ? '#10b981' : '#6366f1' }}>
+              <span className="fw-bold" style={{ fontSize: '13px', color: hasGoal && goal?.achieved ? '#10b981' : '#6366f1' }}>
                 {percent}% complete
               </span>
               {longestStreak > 0 && (
@@ -347,7 +351,6 @@ const StudyGoalCard = () => {
           </div>
         </div>
 
-        {/* Right: Set/Update form */}
         <div className="col-lg-5">
           <form onSubmit={handleSaveGoal} className="p-3 rounded-4 border shadow-sm" style={{ backgroundColor: '#f8fafc' }}>
             <div className="d-flex align-items-center justify-content-between mb-2">
@@ -376,7 +379,6 @@ const StudyGoalCard = () => {
               </button>
             </div>
 
-            {/* Duration */}
             <label className="form-label small fw-bold text-muted mb-1" style={{ fontSize: '11px' }}>
               DURATION
             </label>
@@ -431,7 +433,6 @@ const StudyGoalCard = () => {
         </div>
       </div>
 
-      {/* Calendar Modal */}
       {showCalendar && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -448,19 +449,19 @@ const StudyGoalCard = () => {
                 <h6 className="fw-bold mb-0">Pick a date</h6>
                 <small className="text-muted">Highlighted days already have goals</small>
               </div>
-              <button className="btn btn-sm btn-light rounded-circle border-0" onClick={() => setShowCalendar(false)}>
+              <button className="btn btn-sm btn-light rounded-circle border-0" onClick={() => setShowCalendar(false)} type="button">
                 <X size={18} />
               </button>
             </div>
 
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <button className="btn btn-sm btn-light rounded-circle" onClick={prevMonth}>
+              <button className="btn btn-sm btn-light rounded-circle" onClick={prevMonth} type="button">
                 <ChevronLeft size={18} />
               </button>
               <span className="fw-bold">
                 {MONTHS[calMonth - 1]} {calYear}
               </span>
-              <button className="btn btn-sm btn-light rounded-circle" onClick={nextMonth}>
+              <button className="btn btn-sm btn-light rounded-circle" onClick={nextMonth} type="button">
                 <ChevronRight size={18} />
               </button>
             </div>

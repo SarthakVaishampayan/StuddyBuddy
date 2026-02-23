@@ -5,28 +5,35 @@ import { protectRoute } from './auth.js';
 
 const router = express.Router();
 
-const todayStr = () => new Date().toISOString().split('T')[0];
+// Local YYYY-MM-DD (server timezone; fine for localhost India dev)
+const yyyyMmDdLocal = (d = new Date()) => {
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0, 10);
+};
+
+const todayStr = () => yyyyMmDdLocal(new Date());
 
 // ── GET all habits ──────────────────────────────────────────────────────────
 router.get('/', protectRoute, async (req, res) => {
   try {
     const habits = await Habit.find({ user: req.user.userId }).sort({ createdAt: 1 });
-
     const today = todayStr();
 
     const result = habits.map(h => {
-      const completedToday = h.completedDates.some(
-        d => new Date(d).toISOString().split('T')[0] === today
+      const completedToday = (h.completedDates || []).some(
+        d => yyyyMmDdLocal(d) === today
       );
+
       return {
-        _id:            h._id,
-        name:           h.name,
-        emoji:          h.emoji,
-        color:          h.color,
+        _id: h._id,
+        name: h.name,
+        emoji: h.emoji,
+        color: h.color,
         completedToday,
-        streak:         h.calculateStreak(),
+        streak: h.calculateStreak(),
         completedDates: h.completedDates,
-        createdAt:      h.createdAt,
+        createdAt: h.createdAt,
       };
     });
 
@@ -53,16 +60,17 @@ router.post('/', protectRoute, async (req, res) => {
     res.status(201).json({
       success: true,
       habit: {
-        _id:            habit._id,
-        name:           habit.name,
-        emoji:          habit.emoji,
-        color:          habit.color,
+        _id: habit._id,
+        name: habit.name,
+        emoji: habit.emoji,
+        color: habit.color,
         completedToday: false,
-        streak:         0,
+        streak: 0,
         completedDates: [],
       },
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to create habit' });
   }
 });
@@ -74,17 +82,16 @@ router.patch('/:id/toggle', protectRoute, async (req, res) => {
     if (!habit) return res.status(404).json({ success: false, message: 'Habit not found' });
 
     const today = todayStr();
-    const alreadyDone = habit.completedDates.some(
-      d => new Date(d).toISOString().split('T')[0] === today
+    const alreadyDone = (habit.completedDates || []).some(
+      d => yyyyMmDdLocal(d) === today
     );
 
     if (alreadyDone) {
-      // Remove today's date (un-toggle)
       habit.completedDates = habit.completedDates.filter(
-        d => new Date(d).toISOString().split('T')[0] !== today
+        d => yyyyMmDdLocal(d) !== today
       );
     } else {
-      // Add today's date
+      // Keep exact behavior: push "now"; streak logic uses local day string later
       habit.completedDates.push(new Date());
     }
 
@@ -93,12 +100,12 @@ router.patch('/:id/toggle', protectRoute, async (req, res) => {
     res.json({
       success: true,
       habit: {
-        _id:            habit._id,
-        name:           habit.name,
-        emoji:          habit.emoji,
-        color:          habit.color,
+        _id: habit._id,
+        name: habit.name,
+        emoji: habit.emoji,
+        color: habit.color,
         completedToday: !alreadyDone,
-        streak:         habit.calculateStreak(),
+        streak: habit.calculateStreak(),
         completedDates: habit.completedDates,
       },
     });
@@ -112,40 +119,38 @@ router.patch('/:id/toggle', protectRoute, async (req, res) => {
 router.delete('/:id', protectRoute, async (req, res) => {
   try {
     const habit = await Habit.findOneAndDelete({
-      _id:  req.params.id,
+      _id: req.params.id,
       user: req.user.userId,
     });
     if (!habit) return res.status(404).json({ success: false, message: 'Habit not found' });
     res.json({ success: true });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to delete habit' });
   }
 });
 
 // ── GET calendar data for a habit ──────────────────────────────────────────
-// Returns all completed date strings for a given month
-// Query: /api/habits/:id/calendar?month=2&year=2026
 router.get('/:id/calendar', protectRoute, async (req, res) => {
   try {
     const habit = await Habit.findOne({ _id: req.params.id, user: req.user.userId });
     if (!habit) return res.status(404).json({ success: false, message: 'Habit not found' });
 
-    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
-    const year  = parseInt(req.query.year)  || new Date().getFullYear();
+    const month = parseInt(req.query.month, 10) || new Date().getMonth() + 1;
+    const year = parseInt(req.query.year, 10) || new Date().getFullYear();
 
-    // Filter completedDates to only those in the requested month/year
-    const datesInMonth = habit.completedDates
+    const datesInMonth = (habit.completedDates || [])
       .filter(d => {
         const dt = new Date(d);
-        return dt.getMonth() + 1 === month && dt.getFullYear() === year;
+        return (dt.getMonth() + 1) === month && dt.getFullYear() === year;
       })
-      .map(d => new Date(d).toISOString().split('T')[0]);
+      .map(d => yyyyMmDdLocal(d));
 
     res.json({
       success: true,
       habit: {
-        _id:   habit._id,
-        name:  habit.name,
+        _id: habit._id,
+        name: habit.name,
         emoji: habit.emoji,
         color: habit.color,
       },
@@ -154,6 +159,7 @@ router.get('/:id/calendar', protectRoute, async (req, res) => {
       completedDates: datesInMonth,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch calendar' });
   }
 });

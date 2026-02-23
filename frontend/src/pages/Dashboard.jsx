@@ -6,11 +6,13 @@ import StudyGoalCard from '../components/StudyGoalCard';
 import HabitCalendarModal from '../components/HabitCalendarModal';
 import { useAuth } from '../context/AuthContext';
 import { useTimer } from '../context/TimerContext';
-import { yyyyMmDdLocal } from '../utils/date';
+import { useLiveLocalDay } from '../utils/date';
+
 import {
   Play, Pause, Save, RotateCcw, Check, Plus, Trash2,
   Calendar, AlertCircle, Clock, Hourglass, Flame
 } from 'lucide-react';
+
 import {
   BarChart, Bar, XAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, YAxis
@@ -53,7 +55,8 @@ const Dashboard = () => {
   const [reminderForm, setReminderForm] = useState({ text: '', deadline: '' });
   const [timerInput, setTimerInput] = useState(60);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  // IMPORTANT: local live day string (YYYY-MM-DD) that flips at midnight IST
+  const todayStr = useLiveLocalDay();
 
   const formatHms = (sec) => {
     const s = Math.max(0, Number(sec) || 0);
@@ -107,9 +110,11 @@ const Dashboard = () => {
     }
   };
 
+  // KEY FIX: also refetch when local day changes (midnight IST)
   useEffect(() => {
     if (token) fetchData();
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, todayStr]);
 
   // Timer helpers
   const startCountdown = () => {
@@ -214,10 +219,7 @@ const Dashboard = () => {
       if (mode === 'stopwatch') setElapsedTime(0);
       else setElapsedTime(initialTime || 0);
 
-      // Refresh dashboard stats
       fetchData();
-
-      // IMPORTANT: tell StudyGoalCard to refresh immediately
       window.dispatchEvent(new Event('study-session-logged'));
     }
   };

@@ -1,22 +1,23 @@
+// File: StudyBuddy/frontend/src/pages/AboutUs.jsx
 import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import {
   Mail, Github, Linkedin, Send, Bug, MessageSquare, Sparkles,
-  Timer, BarChart3, CheckCircle2, CalendarDays, ListChecks, BookOpen, Link2, Shield
+  Timer, BarChart3, CheckCircle2, CalendarDays, ListChecks,
+  BookOpen, Link2, Shield
 } from 'lucide-react';
 
 const AboutUs = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { notifyError, notifyInfo } = useNotification();
 
-  // Live version shown in UI
   const appVersion = import.meta.env.VITE_APP_VERSION || '0.0.0';
 
   const [submitting, setSubmitting] = useState(false);
+  const [reminders, setReminders] = useState([]);
 
-  // NOTE: For now we keep the same form (later: EmailJS integration).
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -25,11 +26,22 @@ const AboutUs = () => {
     message: '',
   });
 
+  // Fetch reminders so Navbar can show notification bell (same as all other pages)
+  useEffect(() => {
+    if (!token) return;
+    fetch('http://localhost:5000/api/reminders', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => { if (data?.success) setReminders(data.reminders || []); })
+      .catch(() => {});
+  }, [token]);
+
   useEffect(() => {
     if (!user) return;
     setForm((prev) => ({
       ...prev,
-      name: prev.name || user.name || '',
+      name:  prev.name  || user.name  || '',
       email: prev.email || user.email || '',
     }));
   }, [user]);
@@ -82,7 +94,7 @@ const AboutUs = () => {
       version: appVersion,
       date: 'Live now',
       items: [
-        'Added “Your Space” page (Marks Manager + Link Manager).',
+        'Added "Your Space" page (Marks Manager + Link Manager).',
         'Improved About Us page with features & version updates section.',
       ],
     },
@@ -101,7 +113,6 @@ const AboutUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Placeholder until EmailJS is integrated
     if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
       notifyError('Please fill all required fields.');
       return;
@@ -109,18 +120,9 @@ const AboutUs = () => {
 
     try {
       setSubmitting(true);
-
-      // For now: no DB + no backend email. EmailJS will be added later.
       await new Promise((r) => setTimeout(r, 500));
-
       notifyInfo('Contact form is ready. Email sending will be enabled in the next update (EmailJS).');
-
-      setForm((prev) => ({
-        ...prev,
-        subject: '',
-        type: 'bug',
-        message: '',
-      }));
+      setForm((prev) => ({ ...prev, subject: '', type: 'bug', message: '' }));
     } catch (err) {
       console.error(err);
       notifyError('Failed to submit. Please try again.');
@@ -131,7 +133,8 @@ const AboutUs = () => {
 
   return (
     <div className="bg-light min-vh-100 pb-5">
-      <Navbar notifications={[]} />
+      {/* FIX: pass real reminders so notification bell works */}
+      <Navbar notifications={reminders} />
 
       <div className="p-4 px-lg-5">
         {/* HERO */}
@@ -153,7 +156,6 @@ const AboutUs = () => {
                 StudyBuddy is a student productivity dashboard designed to help you stay consistent with habits,
                 track subjects & tasks, log study time, and manage your personal study resources.
               </p>
-
               <div className="d-flex gap-2 flex-wrap">
                 <span className="badge rounded-pill px-3 py-2 bg-primary bg-opacity-10 text-primary fw-bold">
                   Live version: {appVersion}
@@ -201,14 +203,12 @@ const AboutUs = () => {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
 
         {/* Developer + Features */}
         <div className="row g-4 mb-4">
-          {/* Developer Card */}
           <div className="col-lg-4">
             <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
               <h6 className="fw-bold mb-3 text-muted text-uppercase" style={{ fontSize: '11px' }}>
@@ -222,40 +222,27 @@ const AboutUs = () => {
                 >
                   <span className="fw-bold text-primary" style={{ fontSize: '22px' }}>SV</span>
                 </div>
-
                 <div style={{ minWidth: 0 }}>
                   <div className="fw-bold text-dark">Sarthak Vaishampayan</div>
-                  <div className="text-muted small text-truncate">Full‑Stack MERN Developer · StudyBuddy Creator</div>
+                  <div className="text-muted small text-truncate">Full‑Stack MERN Developer · Creator@StudyBuddy</div>
                 </div>
               </div>
 
               <div className="d-flex flex-column gap-2 small">
                 <div className="d-flex align-items-center gap-2">
                   <Mail size={16} className="text-secondary" />
-                  <span className="text-truncate">sarthakrocks2003@example.com</span>
+                  <span className="text-truncate">sarthakvaishampayan22@gmail.com</span>
                 </div>
-
                 <div className="d-flex align-items-center gap-2">
                   <Github size={16} className="text-secondary" />
-                  <a
-                    href="https://github.com/sarthak-vaishampayan"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="small"
-                  >
-                    github.com/sarthak-vaishampayan
+                  <a href="https://github.com/SarthakVaishampayan" target="_blank" rel="noreferrer" className="small">
+                    github/sarthak-vaishampayan
                   </a>
                 </div>
-
                 <div className="d-flex align-items-center gap-2">
                   <Linkedin size={16} className="text-secondary" />
-                  <a
-                    href="https://www.linkedin.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="small"
-                  >
-                    LinkedIn Profile
+                  <a href="https://www.linkedin.com/in/sarthakvaishampayan/" target="_blank" rel="noreferrer" className="small">
+                    LinkedIn/SarthakVaishampayan
                   </a>
                 </div>
               </div>
@@ -263,13 +250,15 @@ const AboutUs = () => {
               <hr className="my-4" />
 
               <div className="text-muted small">
-                Built with React (Vite) + Node/Express + MongoDB and designed for a clean,
-                modern student workflow.
+                I'm Sarthak Vaishampayan, a Computer Science student at Manipal University Jaipur and the developer
+                behind StudyBuddy. I enjoy building clean, scalable web applications that solve real problems. With
+                experience in full-stack development and a strong foundation in algorithms and system design, I focus
+                on creating practical, user-friendly solutions. I'm passionate about technology, continuous learning,
+                and turning ideas into impactful digital products.
               </div>
             </div>
           </div>
 
-          {/* Features grid */}
           <div className="col-lg-8">
             <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -299,7 +288,7 @@ const AboutUs = () => {
               </div>
 
               <div className="mt-3 text-muted small">
-                Want a feature explained in detail? Use the contact form below and choose “Query”.
+                Want a feature explained in detail? Use the contact form below and choose "Query".
               </div>
             </div>
           </div>
@@ -327,7 +316,6 @@ const AboutUs = () => {
                       {release.version === appVersion ? 'Current' : 'Planned'}
                     </span>
                   </div>
-
                   <ul className="mb-0 text-muted small">
                     {release.items.map((it, idx) => (
                       <li key={idx}>{it}</li>
@@ -356,9 +344,7 @@ const AboutUs = () => {
           <form onSubmit={handleSubmit}>
             <div className="row g-3">
               <div className="col-md-6">
-                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>
-                  NAME *
-                </label>
+                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>NAME *</label>
                 <input
                   type="text"
                   className="form-control bg-light border-0 rounded-3"
@@ -370,9 +356,7 @@ const AboutUs = () => {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>
-                  EMAIL *
-                </label>
+                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>EMAIL *</label>
                 <input
                   type="email"
                   className="form-control bg-light border-0 rounded-3"
@@ -384,9 +368,7 @@ const AboutUs = () => {
               </div>
 
               <div className="col-md-8">
-                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>
-                  SUBJECT *
-                </label>
+                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>SUBJECT *</label>
                 <input
                   type="text"
                   className="form-control bg-light border-0 rounded-3"
@@ -398,9 +380,7 @@ const AboutUs = () => {
               </div>
 
               <div className="col-md-4">
-                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>
-                  TYPE
-                </label>
+                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>TYPE</label>
                 <select
                   className="form-select bg-light border-0 rounded-3"
                   value={form.type}
@@ -414,9 +394,7 @@ const AboutUs = () => {
               </div>
 
               <div className="col-12">
-                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>
-                  MESSAGE *
-                </label>
+                <label className="form-label small fw-bold text-muted" style={{ fontSize: '11px' }}>MESSAGE *</label>
                 <textarea
                   className="form-control bg-light border-0 rounded-3"
                   rows="6"
@@ -433,7 +411,6 @@ const AboutUs = () => {
                 <Bug size={14} />
                 <span>Tip: Mention page name + steps to reproduce.</span>
               </div>
-
               <button
                 type="submit"
                 className="btn btn-primary fw-bold rounded-3 d-inline-flex align-items-center gap-2 px-4"
@@ -446,7 +423,7 @@ const AboutUs = () => {
           </form>
 
           <div className="mt-3 text-muted small">
-            Note: Email sending is intentionally disabled right now (as requested). We’ll enable it using EmailJS in the next update.
+            Note: Email sending is intentionally disabled right now. We'll enable it using EmailJS in the next update.
           </div>
         </div>
       </div>
