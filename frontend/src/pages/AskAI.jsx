@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil } from 'lucide-react';
+import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil, Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const AskAI = () => {
@@ -16,6 +16,7 @@ const AskAI = () => {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [processingTime, setProcessingTime] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -315,7 +316,7 @@ const AskAI = () => {
                 </form>
 
                 {/* Response Box */}
-                <div className="flex-grow-1 border rounded-3 p-4 bg-light overflow-auto" style={{ minHeight: '250px', maxHeight: '500px' }}>
+                <div className="flex-grow-1 border rounded-3 p-4 bg-light overflow-auto" style={{ minHeight: '400px', maxHeight: '75vh' }}>
                   {isProcessing ? (
                      <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
                         <Loader2 size={40} className="spin mb-3 text-primary" style={{ animation: 'spin 1s linear infinite' }} />
@@ -324,8 +325,18 @@ const AskAI = () => {
                         <style>{`@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
                      </div>
                   ) : result ? (
-                    <div className="text-dark markdown-body" style={{ lineHeight: '1.6' }}>
-                      <ReactMarkdown>{result}</ReactMarkdown>
+                    <div className="h-100">
+                      <div className="d-flex justify-content-end mb-3 sticky-top bg-light pb-2" style={{ top: '-10px', zIndex: 10 }}>
+                        <button 
+                           className="btn btn-outline-primary fw-bold shadow-sm rounded-pill d-flex align-items-center px-3 py-2 bg-white" 
+                           onClick={() => setIsExpanded(true)}
+                        >
+                           <Maximize2 size={18} className="me-2" /> Read in Full Screen
+                        </button>
+                      </div>
+                      <div className="text-dark markdown-body" style={{ lineHeight: '1.6' }}>
+                        <ReactMarkdown>{result}</ReactMarkdown>
+                      </div>
                     </div>
                   ) : (
                     <div className="h-100 d-flex align-items-center justify-content-center text-muted opacity-50">
@@ -339,6 +350,25 @@ const AskAI = () => {
           </div>
         </div>
       </div>
+
+      {/* FULL SCREEN RESULT MODAL */}
+      {isExpanded && result && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex align-items-center justify-content-center p-3 p-md-5" style={{ zIndex: 9999, backdropFilter: 'blur(5px)' }}>
+          <div className="bg-white w-100 h-100 rounded-4 shadow-lg d-flex flex-column" style={{ maxWidth: '1000px' }}>
+            <div className="p-3 px-4 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-4">
+              <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+                <Brain size={20} className="text-primary" /> Ask AI
+              </h5>
+              <button className="btn btn-light border rounded-circle p-2 d-flex align-items-center" onClick={() => setIsExpanded(false)}>
+                <Minimize2 size={18} />
+              </button>
+            </div>
+            <div className="p-4 p-md-5 overflow-auto flex-grow-1 markdown-body text-dark" style={{ lineHeight: '1.7', fontSize: '16px' }}>
+              <ReactMarkdown>{result}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
