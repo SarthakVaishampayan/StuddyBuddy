@@ -1,13 +1,14 @@
 import express from 'express';
 import multer from 'multer';
 import { PDFParse } from 'pdf-parse';
+import officeParser from 'officeparser';
 import { GoogleGenAI } from '@google/genai';
 import Document from '../models/Document.js';
 import { protect } from '../middleware/auth.js';
 const router = express.Router();
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB max allowed by multer (PPTs)
 });
 
 // Upload and Parse PDF
@@ -15,7 +16,7 @@ router.post('/upload', protect, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'File size too big. Maximum allowed size is 5MB.' });
+        return res.status(400).json({ message: 'File size too big. Maximum allowed size is 10MB.' });
       }
       return res.status(400).json({ message: err.message });
     } else if (err) {
@@ -29,20 +30,33 @@ router.post('/upload', protect, (req, res, next) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Use pdf-parse to extract text 
+    // Extract text based on file type
     let textContent = '';
     try {
-      const parser = new PDFParse({ data: req.file.buffer });
-      const data = await parser.getText();
-      textContent = data.text;
-      await parser.destroy();
+      if (req.file.mimetype === 'application/pdf') {
+        if (req.file.size > 5 * 1024 * 1024) {
+          return res.status(400).json({ message: 'PDF files must be under 5MB.' });
+        }
+        const parser = new PDFParse({ data: req.file.buffer });
+        const data = await parser.getText();
+        textContent = data.text;
+        await parser.destroy();
+      } else if (
+        req.file.mimetype === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        req.file.mimetype === 'application/vnd.ms-powerpoint'
+      ) {
+        const ast = await officeParser.parseOffice(req.file.buffer);
+        textContent = ast.toText();
+      } else {
+        return res.status(400).json({ message: 'Unsupported file type. Upload PDF or PowerPoint.' });
+      }
     } catch (parseError) {
       console.error("Parse error:", parseError);
-      return res.status(400).json({ message: 'Error processing PDF content.', error: parseError.message });
+      return res.status(400).json({ message: 'Error processing document content.', error: parseError.message });
     }
 
     if (!textContent || textContent.trim() === '') {
-      return res.status(400).json({ message: 'Could not extract text from this PDF.' });
+      return res.status(400).json({ message: 'Could not extract any text from this file.' });
     }
 
     // Save to DB
@@ -142,6 +156,9 @@ router.post('/action', protect, async (req, res) => {
     res.status(200).json({ result: response.text });
 
   } catch (error) {
+    if (error.status === 429) {
+      return res.status(429).json({ message: 'API rate limit exceeded. Please wait a minute before trying again.' });
+    }
     console.error('AI Action Error:', error);
     res.status(500).json({ message: 'Error generating AI content', error: error.message });
   }
@@ -176,6 +193,9 @@ router.post('/ask', protect, async (req, res) => {
     res.status(200).json({ answer: response.text });
 
   } catch (error) {
+    if (error.status === 429) {
+      return res.status(429).json({ message: 'API rate limit exceeded. Please wait a minute before trying again.' });
+    }
     console.error('AI Ask Error:', error);
     res.status(500).json({ message: 'Error answering question', error: error.message });
   }

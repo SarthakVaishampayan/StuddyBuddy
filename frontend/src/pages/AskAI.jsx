@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil, Maximize2, Minimize2 } from 'lucide-react';
+import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil, Maximize2, Minimize2, Presentation } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const AskAI = () => {
@@ -17,6 +17,15 @@ const AskAI = () => {
   const [error, setError] = useState('');
   const [processingTime, setProcessingTime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [rateLimitTimer, setRateLimitTimer] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (rateLimitTimer > 0) {
+      interval = setInterval(() => setRateLimitTimer(p => p - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [rateLimitTimer]);
 
   useEffect(() => {
     let interval;
@@ -61,13 +70,24 @@ const AskAI = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      setError('Please upload a valid PDF file.');
+    const isPdf = file.type === 'application/pdf';
+    const isPpt = file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || 
+                  file.type === 'application/vnd.ms-powerpoint' ||
+                  file.name.endsWith('.ppt') || file.name.endsWith('.pptx');
+
+    if (!isPdf && !isPpt) {
+      setError('Please upload a valid PDF or PowerPoint file.');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size too big! Please upload a PDF under 5MB.');
+    if (isPdf && file.size > 5 * 1024 * 1024) {
+      setError('PDF files must be strictly under 5MB.');
+      e.target.value = null; // reset
+      return;
+    }
+    
+    if (isPpt && file.size > 10 * 1024 * 1024) {
+      setError('PowerPoint files must be under 10MB.');
       e.target.value = null; // reset
       return;
     }
@@ -138,7 +158,10 @@ const AskAI = () => {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Action failed');
+      if (!res.ok) {
+        if (res.status === 429) setRateLimitTimer(60);
+        throw new Error(data.message || 'Action failed');
+      }
       
       setResult(data.result);
     } catch (err) {
@@ -167,7 +190,10 @@ const AskAI = () => {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Ask failed');
+      if (!res.ok) {
+        if (res.status === 429) setRateLimitTimer(60);
+        throw new Error(data.message || 'Ask failed');
+      }
       
       setResult(data.answer);
       setQuery('');
@@ -190,8 +216,13 @@ const AskAI = () => {
       </p>
 
       {error && (
-        <div className="alert alert-danger rounded-3 border-0 fade show">
-          {error}
+        <div className="alert alert-danger rounded-3 border-0 fade show d-flex align-items-center">
+          <span>{error}</span>
+          {rateLimitTimer > 0 && (
+            <span className="ms-auto fw-bold bg-danger text-white px-3 py-1 rounded-pill small">
+              Wait {rateLimitTimer}s
+            </span>
+          )}
         </div>
       )}
 
@@ -205,20 +236,28 @@ const AskAI = () => {
             </h5>
             
             {/* Upload Area */}
-            <label className="d-block w-100 p-4 rounded-3 border border-2 border-dashed text-center flex-column align-items-center justify-content-center mb-4" style={{ cursor: 'pointer', backgroundColor: '#f8f9fa', borderColor: '#dee2e6' }}>
-              {uploading ? (
-                <>
-                  <Loader2 size={28} className="text-primary mb-2 spin mx-auto d-block" />
-                  <span className="fw-medium text-secondary">Extracting text...</span>
-                </>
-              ) : (
-                <>
-                  <Upload size={28} className="text-primary mb-2 mx-auto d-block" />
-                  <span className="fw-medium text-secondary">Click to upload PDF (Max 5MB)</span>
-                </>
-              )}
-              <input type="file" accept="application/pdf" className="d-none" onChange={handleFileUpload} disabled={uploading} />
-            </label>
+            {uploading ? (
+              <div className="d-block w-100 p-4 rounded-3 border border-2 border-dashed text-center d-flex flex-column align-items-center justify-content-center mb-4" style={{ backgroundColor: '#f8f9fa', borderColor: '#dee2e6' }}>
+                 <Loader2 size={28} className="text-primary mb-2 spin mx-auto d-block" />
+                 <span className="fw-medium text-secondary">Extracting text...</span>
+              </div>
+            ) : (
+              <div className="d-flex gap-3 mb-4">
+                <label className="w-50 p-3 rounded-3 border border-2 border-dashed text-center d-flex flex-column align-items-center justify-content-center transition-all bg-light" style={{ cursor: 'pointer', borderColor: '#dee2e6' }}>
+                  <FileText size={24} className="text-danger mb-2" />
+                  <span className="small fw-bold text-secondary">Upload PDF</span>
+                  <span className="text-muted" style={{fontSize:'11px'}}>(Max 5MB)</span>
+                  <input type="file" accept="application/pdf" className="d-none" onChange={handleFileUpload} disabled={uploading} />
+                </label>
+                
+                <label className="w-50 p-3 rounded-3 border border-2 border-dashed text-center d-flex flex-column align-items-center justify-content-center bg-light" style={{ cursor: 'pointer', borderColor: '#dee2e6' }}>
+                  <Presentation size={24} className="text-warning mb-2" />
+                  <span className="small fw-bold text-secondary">Upload PPT</span>
+                  <span className="text-muted" style={{fontSize:'11px'}}>(Max 10MB)</span>
+                  <input type="file" accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" className="d-none" onChange={handleFileUpload} disabled={uploading} />
+                </label>
+              </div>
+            )}
 
             {/* Doc List */}
             <div className="d-flex flex-column gap-2">
@@ -275,19 +314,19 @@ const AskAI = () => {
                 {/* AI Action Buttons */}
                 <h6 className="fw-bold mb-3 text-secondary small text-uppercase">Presets</h6>
                 <div className="d-flex flex-wrap gap-2 mb-4">
-                  <button onClick={() => handleAction('pageSummary')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing}>
+                  <button onClick={() => handleAction('pageSummary')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing || rateLimitTimer > 0}>
                     <BookOpen size={16} className="me-2 text-primary" /> Summarize
                   </button>
-                  <button onClick={() => handleAction('topics')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing}>
+                  <button onClick={() => handleAction('topics')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing || rateLimitTimer > 0}>
                     <List size={16} className="me-2 text-warning" /> Detect Topics
                   </button>
-                  <button onClick={() => handleAction('topicSummary')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing}>
+                  <button onClick={() => handleAction('topicSummary')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing || rateLimitTimer > 0}>
                     <List size={16} className="me-2 text-info" /> Topic Summary
                   </button>
-                  <button onClick={() => handleAction('quiz')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing}>
+                  <button onClick={() => handleAction('quiz')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing || rateLimitTimer > 0}>
                     <Brain size={16} className="me-2 text-success" /> Generate Quiz
                   </button>
-                  <button onClick={() => handleAction('notes')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing}>
+                  <button onClick={() => handleAction('notes')} className="btn btn-light border fw-medium small rounded-pill px-3 py-2 text-dark" disabled={isProcessing || rateLimitTimer > 0}>
                     <Pencil size={16} className="me-2" style={{color: '#8b5cf6'}}/> Create Notes
                   </button>
                 </div>
@@ -308,7 +347,7 @@ const AskAI = () => {
                     <button 
                       className="btn btn-primary rounded-end-pill px-4" 
                       type="submit"
-                      disabled={isProcessing || !query.trim()}
+                      disabled={isProcessing || rateLimitTimer > 0 || !query.trim()}
                     >
                       <Send size={18} />
                     </button>
