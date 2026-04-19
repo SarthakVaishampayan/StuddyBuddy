@@ -182,7 +182,7 @@ const Analytics = () => {
         <div className="bg-white p-4 rounded-4 border shadow-sm mb-4">
           <h6 className="fw-bold mb-4">Focus Duration Trend (Hours)</h6>
           <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
                 <XAxis
@@ -237,7 +237,7 @@ const Analytics = () => {
               How your daily logged time compares to your set goals.
             </p>
             <div style={{ width: '100%', height: 280 }}>
-              <ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={goalWeekly} barGap={4}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} />

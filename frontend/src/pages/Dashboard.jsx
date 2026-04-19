@@ -350,7 +350,7 @@ const Dashboard = () => {
               </div>
 
               <div style={{ width: '100%', height: 320 }}>
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
                     <XAxis

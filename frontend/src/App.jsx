@@ -11,6 +11,7 @@ import Login      from './pages/Login';
 import Register   from './pages/Register';
 import YourSpace  from './pages/YourSpace';
 import AboutUs    from './pages/AboutUs';
+import AskAI      from './pages/AskAI';
 
 import { AuthProvider, useAuth }                   from './context/AuthContext';
 import { TimerProvider, useTimer }                 from './context/TimerContext';
@@ -175,7 +176,7 @@ function App() {
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/about" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
 
-                <Route path="/chats" element={<ProtectedRoute><Placeholder title="Study Chat" /></ProtectedRoute>} />
+                <Route path="/ask-ai" element={<ProtectedRoute><AskAI /></ProtectedRoute>} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

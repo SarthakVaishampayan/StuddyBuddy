@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, BookOpen, Book,
-  MessageSquare, LogOut, User,
+  MessageSquare, LogOut, User, Brain,
   ChevronLeft, ChevronRight, Info, Sparkles
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -21,7 +21,7 @@ const Sidebar = () => {
     // NEW
     { name: 'Your Space', icon: <Sparkles size={20} />,       path: '/space' },
 
-    { name: 'Chats',     icon: <MessageSquare size={20} />,   path: '/chats' },
+    { name: 'Ask AI',    icon: <Brain size={20} />,   path: '/ask-ai' },
   ];
 
   return (
