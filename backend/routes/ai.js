@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { PDFParse } from 'pdf-parse';
 import officeParser from 'officeparser';
-import { GoogleGenAI } from '@google/genai';
+import Groq from 'groq-sdk';
 import Document from '../models/Document.js';
 import { protect } from '../middleware/auth.js';
 const router = express.Router();
@@ -114,8 +114,8 @@ router.post('/action', protect, async (req, res) => {
   try {
     const { documentId, actionType } = req.body;
     
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ message: 'GEMINI_API_KEY is not configured.' });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ message: 'GROQ_API_KEY is not configured.' });
     }
 
     const doc = await Document.findOne({ _id: documentId, user: req.user._id });
@@ -123,7 +123,7 @@ router.post('/action', protect, async (req, res) => {
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     let actionPrompt = "";
 
     switch (actionType) {
@@ -148,12 +148,15 @@ router.post('/action', protect, async (req, res) => {
 
     const fullPrompt = `You are a helpful student assistant. Based ONLY on the following extracted PDF text, complete the requested action. Do not use outside knowledge. \n\nTEXT:\n${doc.textContent}\n\nACTION:\n${actionPrompt}`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: fullPrompt
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: 'You are a helpful student assistant.' },
+        { role: 'user', content: fullPrompt }
+      ]
     });
 
-    res.status(200).json({ result: response.text });
+    res.status(200).json({ result: response.choices[0].message.content });
 
   } catch (error) {
     if (error.status === 429) {
@@ -173,8 +176,8 @@ router.post('/ask', protect, async (req, res) => {
       return res.status(400).json({ message: 'Question string is required.' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ message: 'GEMINI_API_KEY is not configured.' });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ message: 'GROQ_API_KEY is not configured.' });
     }
 
     const doc = await Document.findOne({ _id: documentId, user: req.user._id });
@@ -182,15 +185,18 @@ router.post('/ask', protect, async (req, res) => {
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const fullPrompt = `You are a helpful study assistant. Answer the following question based ONLY on the provided text. If the answer is not in the text, say 'I cannot find the answer in the document.' \n\nTEXT:\n${doc.textContent}\n\nQUESTION:\n${question}`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: fullPrompt
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: 'You are a helpful student assistant.' },
+        { role: 'user', content: fullPrompt }
+      ]
     });
 
-    res.status(200).json({ answer: response.text });
+    res.status(200).json({ answer: response.choices[0].message.content });
 
   } catch (error) {
     if (error.status === 429) {
