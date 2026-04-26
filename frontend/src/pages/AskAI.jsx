@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil, Maximize2, Minimize2, Presentation } from 'lucide-react';
+import { Upload, FileText, Trash2, Send, Loader2, List, BookOpen, Brain, Pencil, Maximize2, Minimize2, Presentation, Menu } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const AskAI = () => {
@@ -206,9 +206,19 @@ const AskAI = () => {
 
   return (
     <div className="p-4 p-md-4 pt-md-3">
-      <div className="d-flex align-items-center mb-3 gap-2">
-        <Brain size={28} className="text-primary" />
-        <h2 className="fw-bold mb-0 text-dark">Ask AI</h2>
+      <div className="d-flex align-items-center justify-content-between mb-3 gap-2">
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-light rounded-circle shadow-sm d-lg-none"
+            onClick={() => window.dispatchEvent(new Event('studybuddy:toggle-sidebar'))}
+            title="Toggle sidebar"
+            type="button"
+          >
+            <Menu size={20} />
+          </button>
+          <Brain size={28} className="text-primary" />
+          <h2 className="fw-bold mb-0 text-dark">Ask AI</h2>
+        </div>
       </div>
       
       <p className="text-muted mb-4 lead">

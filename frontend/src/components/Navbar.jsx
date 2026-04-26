@@ -1,6 +1,6 @@
 // File: StudyBuddy/frontend/src/components/Navbar.jsx
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Search, Settings } from 'lucide-react';
+import { Bell, Search, Settings, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({ notifications = [] }) => {
@@ -33,7 +33,17 @@ const Navbar = ({ notifications = [] }) => {
       className="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm"
       style={{ zIndex: 100 }}
     >
-      <h5 className="mb-0 fw-bold text-dark">StudyBuddy</h5>
+      <div className="d-flex align-items-center gap-2">
+        <button
+          className="btn btn-light rounded-circle shadow-sm d-lg-none"
+          onClick={() => window.dispatchEvent(new Event('studybuddy:toggle-sidebar'))}
+          title="Toggle sidebar"
+          type="button"
+        >
+          <Menu size={20} />
+        </button>
+        <h5 className="mb-0 fw-bold text-dark">StudyBuddy</h5>
+      </div>
 
       <div className="d-flex align-items-center gap-3">
         {/* Search — desktop only */}
@@ -73,7 +83,7 @@ const Navbar = ({ notifications = [] }) => {
           {showNotif && (
             <div
               className="position-absolute end-0 mt-2 bg-white shadow-lg border rounded-4 p-3"
-              style={{ width: '320px', zIndex: 200 }}
+              style={{ width: '320px', maxWidth: 'calc(100vw - 2rem)', zIndex: 200 }}
             >
               <div className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                 <h6 className="fw-bold mb-0">Notifications</h6>
