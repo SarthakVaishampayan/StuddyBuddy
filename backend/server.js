@@ -14,6 +14,7 @@ import dailyGoalRoutes from "./routes/dailyGoal.js";
 import marksRoutes from "./routes/marks.js";
 import linksRoutes from "./routes/links.js";
 import aiRoutes from "./routes/ai.js";
+import calendarRoutes from "./routes/calendar.js";
 
 dotenv.config();
 const app = express();
@@ -51,6 +52,7 @@ app.use("/api/daily-goal", dailyGoalRoutes);
 app.use("/api/marks", marksRoutes);
 app.use("/api/links", linksRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

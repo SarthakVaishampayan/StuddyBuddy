@@ -52,6 +52,7 @@ const Dashboard = () => {
   // Forms
   const [newHabitName, setNewHabitName] = useState('');
   const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [reminderForm, setReminderForm] = useState({ text: '', deadline: '' });
   const [timerInput, setTimerInput] = useState(60);
 
@@ -176,10 +177,11 @@ const Dashboard = () => {
     await fetch('http://localhost:5000/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ text: newTaskText.trim() }),
+      body: JSON.stringify({ text: newTaskText.trim(), dueDate: newTaskDueDate || null }),
     });
 
     setNewTaskText('');
+    setNewTaskDueDate('');
     setShowTaskModal(false);
     fetchData();
   };
@@ -424,8 +426,8 @@ const Dashboard = () => {
                         <div
                           className="d-flex align-items-center gap-1 mt-1"
                           style={{ cursor: 'pointer' }}
-                          title="View habit calendar"
-                          onClick={() => setCalendarHabit(h)}
+                          title="View in Global Calendar"
+                          onClick={() => navigate('/calendar')}
                         >
                           <Flame size={13} style={{ color: h.streak > 0 ? '#ea580c' : '#9ca3af' }} />
                           <span
@@ -594,6 +596,13 @@ const Dashboard = () => {
                 autoFocus
                 required
               />
+              <input
+                type="date"
+                className="form-control rounded-3 mb-3 py-3 bg-light border-0 text-muted"
+                value={newTaskDueDate}
+                onChange={(e) => setNewTaskDueDate(e.target.value)}
+                title="Due Date (optional)"
+              />
               <div className="d-flex gap-2">
                 <button type="submit" className="btn btn-primary flex-grow-1 py-2 fw-bold rounded-3">
                   Add
@@ -622,8 +631,8 @@ const Dashboard = () => {
                 required
               />
               <input
-                type="date"
-                min={todayStr}
+                type="datetime-local"
+                min={todayStr + "T00:00"}
                 className="form-control rounded-3 mb-3 py-3 bg-light border-0"
                 value={reminderForm.deadline}
                 onChange={(e) => setReminderForm({ ...reminderForm, deadline: e.target.value })}

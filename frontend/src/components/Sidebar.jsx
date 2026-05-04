@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, BookOpen, Book,
   MessageSquare, LogOut, User, Brain,
-  ChevronLeft, ChevronRight, Info, Sparkles
+  ChevronLeft, ChevronRight, Info, Sparkles, Calendar
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -19,7 +19,7 @@ const Sidebar = () => {
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
     { name: 'Analytics', icon: <BookOpen size={20} />,        path: '/analytics' },
     { name: 'Subjects',  icon: <Book size={20} />,            path: '/subjects' },
-
+    { name: 'Calendar',  icon: <Calendar size={20} />,        path: '/calendar' },
     // NEW
     { name: 'Your Space', icon: <Sparkles size={20} />,       path: '/space' },
 

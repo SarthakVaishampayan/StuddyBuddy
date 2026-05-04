@@ -18,9 +18,9 @@ router.get("/", protectRoute, async (req, res) => {
 // POST new task
 router.post("/", protectRoute, async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, dueDate } = req.body;
     if (!text) return res.status(400).json({ success: false, message: "Text required" });
-    const task = await Task.create({ user: req.user.userId, text });
+    const task = await Task.create({ user: req.user.userId, text, dueDate: dueDate || null });
     res.status(201).json({ success: true, task });
   } catch (err) {
     res.status(400).json({ success: false, message: "Error creating task" });

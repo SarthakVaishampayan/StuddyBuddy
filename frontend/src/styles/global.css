@@ -82,3 +82,102 @@ body {
     transform: translateX(0);
   }
 }
+
+/* ── Calendar styling overrides ───────────────────────────────────── */
+
+/* "+X more" popup */
+.rbc-overlay {
+  background-color: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+  padding: 12px !important;
+  z-index: 1050 !important;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rbc-overlay-header {
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Month view: event tiles should fit their text, not stretch full width */
+.rbc-month-view .rbc-event {
+  max-width: fit-content !important;
+  width: auto !important;
+}
+
+/* Week & Day view: give events readable text and proper height */
+.rbc-time-view .rbc-event {
+  min-height: 22px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.rbc-time-view .rbc-event-label {
+  font-size: 10px !important;
+  display: none !important;          /* hide the default time label */
+}
+
+.rbc-time-view .rbc-event-content {
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+/* Taller time-slot rows so events don't overlap */
+.rbc-time-content > .rbc-time-gutter .rbc-timeslot-group,
+.rbc-time-content > * > .rbc-timeslot-group {
+  min-height: 60px !important;
+}
+
+/* Make the day column stretch so events have room */
+.rbc-day-slot .rbc-events-container {
+  margin-right: 0 !important;
+}
+
+/* Toolbar buttons cleanup */
+.rbc-toolbar button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: #8b5cf6 !important;
+  color: #fff !important;
+  border-color: #8b5cf6 !important;
+}
+
+/* ── Clickable date numbers in month view ─────────────────────────── */
+.cal-date-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 2px;
+  transition: all 0.15s ease;
+}
+
+.cal-date-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.cal-date-header:hover .cal-date-num {
+  background-color: #8b5cf6;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+}

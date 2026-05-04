@@ -12,6 +12,7 @@ import Register   from './pages/Register';
 import YourSpace  from './pages/YourSpace';
 import AboutUs    from './pages/AboutUs';
 import AskAI      from './pages/AskAI';
+import GlobalCalendar from './pages/GlobalCalendar';
 
 import { AuthProvider, useAuth }                   from './context/AuthContext';
 import { TimerProvider, useTimer }                 from './context/TimerContext';
@@ -170,6 +171,7 @@ function App() {
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                 <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
+                <Route path="/calendar" element={<ProtectedRoute><GlobalCalendar /></ProtectedRoute>} />
                 <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
                 <Route path="/space" element={<ProtectedRoute><YourSpace /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

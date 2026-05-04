@@ -10,6 +10,7 @@ const Todo = () => {
   const [tasks, setTasks] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [input, setInput] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   const fetchAllData = async () => {
     try {
@@ -36,9 +37,10 @@ const Todo = () => {
     await fetch('http://localhost:5000/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ text: input }),
+      body: JSON.stringify({ text: input, dueDate: dueDate || null }),
     });
     setInput('');
+    setDueDate('');
     fetchAllData();
   };
 
@@ -85,12 +87,21 @@ const Todo = () => {
               <h5 className="fw-bold mb-4 d-flex align-items-center gap-2">
                 <CheckCircle2 className="text-primary" /> Daily Tasks
               </h5>
-              <form onSubmit={addTask} className="d-flex gap-2 mb-4">
+              <form onSubmit={addTask} className="d-flex flex-wrap gap-2 mb-4">
                 <input
-                  className="form-control rounded-3 py-2"
+                  className="form-control rounded-3 py-2 flex-grow-1"
+                  style={{ minWidth: '200px' }}
                   placeholder="Add a new task..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                />
+                <input
+                  type="date"
+                  className="form-control rounded-3 py-2 text-muted"
+                  style={{ width: 'auto' }}
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  title="Due Date (optional)"
                 />
                 <button type="submit" className="btn btn-primary px-3 rounded-3">
                   <Plus />
