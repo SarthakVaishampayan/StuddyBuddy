@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/Profile.jsx
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -22,7 +21,6 @@ const Profile = () => {
     habitsCount:       0,
   });
 
-  // Fetch live stats + reminders for Navbar
   useEffect(() => {
     if (!token) return;
 

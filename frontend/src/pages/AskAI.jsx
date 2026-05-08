@@ -43,10 +43,8 @@ const AskAI = () => {
     return "Finalizing output... (Large contexts can take 20-40 seconds)";
   };
 
-  // Fetch user's docs on mount
   useEffect(() => {
     fetchDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDocuments = async () => {
@@ -82,13 +80,13 @@ const AskAI = () => {
 
     if (isPdf && file.size > 5 * 1024 * 1024) {
       setError('PDF files must be strictly under 5MB.');
-      e.target.value = null; // reset
+      e.target.value = null;
       return;
     }
     
     if (isPpt && file.size > 10 * 1024 * 1024) {
       setError('PowerPoint files must be under 10MB.');
-      e.target.value = null; // reset
+      e.target.value = null;
       return;
     }
 
@@ -117,7 +115,7 @@ const AskAI = () => {
       setError(err.message);
     } finally {
       setUploading(false);
-      e.target.value = null; // reset input
+      e.target.value = null;
     }
   };
 

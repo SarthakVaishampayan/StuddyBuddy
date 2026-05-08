@@ -4,7 +4,6 @@ import { protectRoute } from "./auth.js";
 
 const router = express.Router();
 
-// POST /api/contact  -> submit a bug/feedback/query
 router.post("/", protectRoute, async (req, res) => {
   try {
     const { name, email, subject, message, type } = req.body;

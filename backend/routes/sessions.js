@@ -1,11 +1,9 @@
-// File: StudyBuddy/backend/routes/sessions.js
 import express from 'express';
 import StudySession from '../models/StudySession.js';
 import { protectRoute } from './auth.js';
 
 const router = express.Router();
 
-// POST /api/sessions — log a study session
 router.post('/', protectRoute, async (req, res) => {
   try {
     const session = await StudySession.create({
@@ -20,10 +18,8 @@ router.post('/', protectRoute, async (req, res) => {
   }
 });
 
-// GET /api/sessions/today — today's total + % change vs yesterday
 router.get('/today', protectRoute, async (req, res) => {
   try {
-    // setHours uses server local time — fine for localhost India
     const startToday = new Date();
     startToday.setHours(0, 0, 0, 0);
 
@@ -61,7 +57,6 @@ router.get('/today', protectRoute, async (req, res) => {
   }
 });
 
-// GET /api/sessions/weekly-stats — last 7 days bar chart data
 router.get('/weekly-stats', protectRoute, async (req, res) => {
   try {
     const daysArr  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/Settings.jsx
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -35,7 +34,6 @@ const Settings = () => {
     focusSounds: false,
   });
 
-  // Populate profile form from user context
   useEffect(() => {
     if (user) {
       setProfileForm({
@@ -46,7 +44,6 @@ const Settings = () => {
     }
   }, [user]);
 
-  // Fetch reminders for Navbar
   useEffect(() => {
     if (!token) return;
     const fetchReminders = async () => {
@@ -63,7 +60,6 @@ const Settings = () => {
     fetchReminders();
   }, [token]);
 
-  // ── Preference toggle ──────────────────────────────────────────────────────
   const toggle = (key) => {
     const next = !preferences[key];
     setPreferences(prev => ({ ...prev, [key]: next }));
@@ -75,7 +71,6 @@ const Settings = () => {
     );
   };
 
-  // ── Profile save ───────────────────────────────────────────────────────────
   const handleProfileSave = async (e) => {
     e.preventDefault();
     setProfileLoading(true);
@@ -112,7 +107,6 @@ const Settings = () => {
     }
   };
 
-  // ── Password change ────────────────────────────────────────────────────────
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (pwForm.newPw !== pwForm.confirm) {

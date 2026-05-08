@@ -20,7 +20,6 @@ const Sidebar = () => {
     { name: 'Analytics', icon: <BookOpen size={20} />,        path: '/analytics' },
     { name: 'Subjects',  icon: <Book size={20} />,            path: '/subjects' },
     { name: 'Calendar',  icon: <Calendar size={20} />,        path: '/calendar' },
-    // NEW
     { name: 'Your Space', icon: <Sparkles size={20} />,       path: '/space' },
 
     { name: 'Ask AI',    icon: <Brain size={20} />,   path: '/ask-ai' },

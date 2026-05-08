@@ -1,4 +1,3 @@
-// File: StudyBuddy/backend/models/Habit.js
 import mongoose from 'mongoose';
 
 const habitSchema = new mongoose.Schema({
@@ -13,14 +12,12 @@ const habitSchema = new mongoose.Schema({
   completedDates: [{ type: Date }],
 }, { timestamps: true });
 
-// Local YYYY-MM-DD (server local timezone)
 const yyyyMmDdLocal = (d = new Date()) => {
   const x = new Date(d);
   x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
   return x.toISOString().slice(0, 10);
 };
 
-// ── Dynamic streak calculation ─────────────────────────────────────────
 habitSchema.methods.calculateStreak = function () {
   if (!this.completedDates?.length) return 0;
 

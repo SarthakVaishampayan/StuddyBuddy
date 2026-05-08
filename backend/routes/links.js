@@ -9,12 +9,10 @@ const isNonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
 const normalizeUrl = (raw) => {
   const u = (raw || "").toString().trim();
   if (!u) return "";
-  // If user enters "google.com", convert to https://google.com
   if (!/^https?:\/\//i.test(u)) return `https://${u}`;
   return u;
 };
 
-// GET /api/links
 router.get("/", protectRoute, async (req, res) => {
   try {
     const links = await Link.find({ user: req.user.userId }).sort({ createdAt: -1 });
@@ -25,7 +23,6 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
-// POST /api/links
 router.post("/", protectRoute, async (req, res) => {
   try {
     const { title, url, description } = req.body;
@@ -39,7 +36,6 @@ router.post("/", protectRoute, async (req, res) => {
 
     const finalUrl = normalizeUrl(url);
 
-    // Basic sanity check after normalization
     if (!/^https?:\/\//i.test(finalUrl)) {
       return res.status(400).json({ success: false, message: "Invalid URL." });
     }
@@ -58,7 +54,6 @@ router.post("/", protectRoute, async (req, res) => {
   }
 });
 
-// DELETE /api/links/:id
 router.delete("/:id", protectRoute, async (req, res) => {
   try {
     const deleted = await Link.findOneAndDelete({ _id: req.params.id, user: req.user.userId });

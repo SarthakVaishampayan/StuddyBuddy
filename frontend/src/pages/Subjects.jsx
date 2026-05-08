@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/Subjects.jsx
 import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +25,6 @@ const priorityBadge = (p) => {
   return map[p] || map['Medium'];
 };
 
-// ── Progress bar component ──────────────────────────────────────────────────
 const ProgressBar = ({ topics }) => {
   if (!topics.length) return (
     <div className="text-muted" style={{ fontSize: '11px' }}>No topics yet</div>
@@ -56,10 +54,10 @@ const Subjects = () => {
   const [subjects, setSubjects]       = useState([]);
   const [loading, setLoading]         = useState(true);
   const [reminders, setReminders]     = useState([]);
-  const [expandedId, setExpandedId]   = useState(null); // which subject card is expanded
+  const [expandedId, setExpandedId]   = useState(null);
   const [showModal, setShowModal]     = useState(false);
-  const [topicInputs, setTopicInputs] = useState({});   // { subjectId: inputValue }
-  const [addingTopic, setAddingTopic] = useState({});   // { subjectId: bool }
+  const [topicInputs, setTopicInputs] = useState({});
+  const [addingTopic, setAddingTopic] = useState({});
 
   const [form, setForm] = useState({
     name:     '',
@@ -69,7 +67,6 @@ const Subjects = () => {
     notes:    '',
   });
 
-  // Fetch subjects + reminders
   useEffect(() => {
     if (!token) return;
     const fetchAll = async () => {
@@ -93,7 +90,6 @@ const Subjects = () => {
     fetchAll();
   }, [token]);
 
-  // ── Add Subject ────────────────────────────────────────────────────────────
   const handleAddSubject = async (e) => {
     e.preventDefault();
     try {
@@ -116,7 +112,6 @@ const Subjects = () => {
     }
   };
 
-  // ── Delete Subject ─────────────────────────────────────────────────────────
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete "${name}"? All its topics will be removed.`)) return;
     try {
@@ -134,7 +129,6 @@ const Subjects = () => {
     }
   };
 
-  // ── Add Topic ──────────────────────────────────────────────────────────────
   const handleAddTopic = async (subjectId) => {
     const title = (topicInputs[subjectId] || '').trim();
     if (!title) return;
@@ -154,7 +148,6 @@ const Subjects = () => {
     }
   };
 
-  // ── Toggle Topic ───────────────────────────────────────────────────────────
   const handleToggleTopic = async (subjectId, topicId) => {
     try {
       const res  = await fetch(`http://localhost:5000/api/subjects/${subjectId}/topics/${topicId}`, {
@@ -170,7 +163,6 @@ const Subjects = () => {
     }
   };
 
-  // ── Delete Topic ───────────────────────────────────────────────────────────
   const handleDeleteTopic = async (subjectId, topicId) => {
     try {
       const res  = await fetch(`http://localhost:5000/api/subjects/${subjectId}/topics/${topicId}`, {

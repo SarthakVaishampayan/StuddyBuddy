@@ -3,19 +3,14 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 const TimerContext = createContext(null);
 
 export const TimerProvider = ({ children }) => {
-  // 'stopwatch' counts up, 'timer' counts down
   const [mode, setMode] = useState('stopwatch');
 
-  // For stopwatch: elapsed seconds
-  // For timer: remaining seconds
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Only for timer mode: starting seconds (to compute studied)
   const [initialTime, setInitialTime] = useState(0);
 
   const [timerRunning, setTimerRunning] = useState(false);
 
-  // Global "timer finished" popup state
   const [sessionEnded, setSessionEnded] = useState(false);
 
   const intervalRef = useRef(null);
@@ -27,7 +22,6 @@ export const TimerProvider = ({ children }) => {
 
   const getTimeStudied = () => {
     if (mode === 'stopwatch') return elapsedTime;
-    // countdown: studied = initial - remaining
     return Math.max(0, (initialTime || 0) - (elapsedTime || 0));
   };
 
@@ -45,7 +39,6 @@ export const TimerProvider = ({ children }) => {
     if (mode === 'stopwatch') {
       setElapsedTime(0);
     } else {
-      // reset to full countdown
       setElapsedTime(initialTime || 0);
     }
   };
@@ -60,12 +53,10 @@ export const TimerProvider = ({ children }) => {
       return;
     }
 
-    // countdown restart from full duration
     setElapsedTime(initialTime || 0);
     setTimerRunning(true);
   };
 
-  // optional: small system notification when countdown ends
   const fireBrowserNotification = async (title, body) => {
     try {
       if (!('Notification' in window)) return;
@@ -80,7 +71,6 @@ export const TimerProvider = ({ children }) => {
         }
       }
     } catch (e) {
-      // ignore if blocked by browser
     }
   };
 
@@ -94,14 +84,10 @@ export const TimerProvider = ({ children }) => {
       setElapsedTime(prev => {
         if (mode === 'stopwatch') return prev + 1;
 
-        // countdown
         if (prev <= 1) {
-          // reaches 0 now
-          // stop timer and open global popup
           setTimerRunning(false);
           setSessionEnded(true);
 
-          // browser notification (optional)
           fireBrowserNotification(
             'Countdown finished',
             'Log your study time, restart, or discard this session.'
@@ -119,7 +105,6 @@ export const TimerProvider = ({ children }) => {
   return (
     <TimerContext.Provider
       value={{
-        // existing
         mode,
         setMode,
         elapsedTime,
@@ -130,7 +115,6 @@ export const TimerProvider = ({ children }) => {
         setTimerRunning,
         getTimeStudied,
 
-        // new global-finish UX
         sessionEnded,
         setSessionEnded,
         stopAndAskToLog,

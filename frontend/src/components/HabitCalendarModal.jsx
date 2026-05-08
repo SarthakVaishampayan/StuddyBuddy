@@ -73,7 +73,6 @@ const HabitCalendarModal = ({ habit, onClose }) => {
     ? Math.round((completedCount / daysInMonth) * 100)
     : 0;
 
-  // prevent navigating beyond current month
   const currentYm = new Date().getFullYear() * 12 + (new Date().getMonth() + 1);
   const selectedYm = year * 12 + month;
   const disableNext = selectedYm >= currentYm;

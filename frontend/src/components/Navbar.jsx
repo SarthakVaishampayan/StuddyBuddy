@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/components/Navbar.jsx
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Search, Settings, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +7,6 @@ const Navbar = ({ notifications = [] }) => {
   const notifRef = useRef(null);
   const navigate = useNavigate();
 
-  // Close panel when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
@@ -19,7 +17,6 @@ const Navbar = ({ notifications = [] }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Filter reminders due today or tomorrow
   const imminent = notifications.filter((r) => {
     if (r.completed) return false;
     const deadlineDay = new Date(new Date(r.deadline).setHours(0, 0, 0, 0));

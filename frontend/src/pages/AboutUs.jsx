@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/AboutUs.jsx
 import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +25,6 @@ const AboutUs = () => {
     message: '',
   });
 
-  // Fetch reminders so Navbar can show notification bell (same as all other pages)
   useEffect(() => {
     if (!token) return;
     fetch('http://localhost:5000/api/reminders', {

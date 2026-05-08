@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/components/StudyGoalCard.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLiveLocalDay } from '../utils/date';
@@ -24,12 +23,10 @@ const StudyGoalCard = () => {
   const { token } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
-  // LIVE "today" string that flips at midnight local time
   const today = useLiveLocalDay();
 
   const [selectedDate, setSelectedDate] = useState(today);
 
-  // If the day flips and user had selected "today", keep it on the new today
   useEffect(() => {
     setSelectedDate((prev) => (prev === today ? today : prev));
   }, [today]);
@@ -46,13 +43,11 @@ const StudyGoalCard = () => {
   const [inputH, setInputH] = useState('');
   const [inputM, setInputM] = useState('');
 
-  // Calendar modal state
   const [showCalendar, setShowCalendar] = useState(false);
-  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1); // 1-12
+  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [goalDates, setGoalDates] = useState(new Set());
 
-  // ---------- Helpers ----------
   const formatTime = (sec) => {
     const s = Math.max(0, Number(sec) || 0);
     const h = Math.floor(s / 3600);
@@ -134,12 +129,10 @@ const StudyGoalCard = () => {
     fetchForDate(selectedDate);
   }, [selectedDate, fetchForDate]);
 
-  // If today flips and user is viewing today, refresh silently
   useEffect(() => {
     if (selectedDate === today) fetchForDate(today, { silent: true });
   }, [today, selectedDate, fetchForDate]);
 
-  // Instant update when session is logged from Dashboard
   useEffect(() => {
     const onLogged = () => fetchForDate(selectedDate, { silent: true });
 
@@ -216,7 +209,6 @@ const StudyGoalCard = () => {
   const hasGoal = !!goal && goal.goalSeconds > 0;
   const percent = hasGoal ? Math.min(100, Math.round((loggedSeconds / goal.goalSeconds) * 100)) : 0;
 
-  // ----- Calendar Grid -----
   const daysInMonth = new Date(calYear, calMonth, 0).getDate();
   const firstDayOfWeek = new Date(calYear, calMonth - 1, 1).getDay();
 

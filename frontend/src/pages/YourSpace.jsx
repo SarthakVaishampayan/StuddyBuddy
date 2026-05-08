@@ -15,7 +15,6 @@ const YourSpace = () => {
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
 
-  // Marks modal
   const [showMarksModal, setShowMarksModal] = useState(false);
   const [marksSubject, setMarksSubject] = useState(null);
   const [marksLoading, setMarksLoading] = useState(false);
@@ -29,7 +28,6 @@ const YourSpace = () => {
     note: '',
   });
 
-  // Links
   const [linksLoading, setLinksLoading] = useState(false);
   const [links, setLinks] = useState([]);
   const [linkForm, setLinkForm] = useState({
@@ -87,12 +85,8 @@ const YourSpace = () => {
     if (!token) return;
     fetchPageData();
     fetchLinks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // MARKS
-  // ───────────────────────────────────────────────────────────────────────────
 
   const openMarks = async (subjectId) => {
     const subject = subjectById.get(subjectId);
@@ -214,9 +208,6 @@ const YourSpace = () => {
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // LINKS
-  // ───────────────────────────────────────────────────────────────────────────
 
   const addLink = async (e) => {
     e.preventDefault();

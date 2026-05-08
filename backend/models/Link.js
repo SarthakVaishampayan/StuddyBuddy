@@ -30,7 +30,6 @@ const linkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Quick listing per user by newest
 linkSchema.index({ user: 1, createdAt: -1 });
 
 export default mongoose.model("Link", linkSchema);

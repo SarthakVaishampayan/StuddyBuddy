@@ -1,4 +1,3 @@
-// File: StudyBuddy/backend/models/Subject.js
 import mongoose from 'mongoose';
 
 const topicSchema = new mongoose.Schema({

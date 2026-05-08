@@ -5,13 +5,13 @@ import officeParser from 'officeparser';
 import Groq from 'groq-sdk';
 import Document from '../models/Document.js';
 import { protect } from '../middleware/auth.js';
+
 const router = express.Router();
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB max allowed by multer (PPTs)
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Upload and Parse PDF
 router.post('/upload', protect, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -30,7 +30,6 @@ router.post('/upload', protect, (req, res, next) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Extract text based on file type
     let textContent = '';
     try {
       if (req.file.mimetype === 'application/pdf') {
@@ -59,22 +58,20 @@ router.post('/upload', protect, (req, res, next) => {
       return res.status(400).json({ message: 'Could not extract any text from this file.' });
     }
 
-    // Save to DB
     const doc = new Document({
       user: req.user._id,
       fileName: req.file.originalname,
       textContent: textContent
     });
-    
+
     await doc.save();
-    
+
     res.status(201).json({
       message: 'Document uploaded and processed successfully',
       document: {
         _id: doc._id,
         fileName: doc.fileName,
         createdAt: doc.createdAt
-        // Note: not sending textContent back to keep response light
       }
     });
 
@@ -84,11 +81,10 @@ router.post('/upload', protect, (req, res, next) => {
   }
 });
 
-// List User Documents
 router.get('/documents', protect, async (req, res) => {
   try {
     const docs = await Document.find({ user: req.user._id })
-      .select('-textContent') // Exclude heavy text
+      .select('-textContent')
       .sort({ createdAt: -1 });
     res.status(200).json(docs);
   } catch (error) {
@@ -96,7 +92,6 @@ router.get('/documents', protect, async (req, res) => {
   }
 });
 
-// Delete Document
 router.delete('/:id', protect, async (req, res) => {
   try {
     const doc = await Document.findOneAndDelete({ _id: req.params.id, user: req.user._id });
@@ -109,11 +104,10 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-// Handle AI Predefined Actions
 router.post('/action', protect, async (req, res) => {
   try {
     const { documentId, actionType } = req.body;
-    
+
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ message: 'GROQ_API_KEY is not configured.' });
     }
@@ -167,7 +161,6 @@ router.post('/action', protect, async (req, res) => {
   }
 });
 
-// Q&A
 router.post('/ask', protect, async (req, res) => {
   try {
     const { documentId, question } = req.body;

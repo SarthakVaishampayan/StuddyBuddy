@@ -7,7 +7,6 @@ const notificationReducer = (state, action) => {
     case 'ADD':
       return {
         ...state,
-        // keep the ID generated in showNotification
         toasts: [action.payload, ...state.toasts],
       };
     case 'REMOVE':

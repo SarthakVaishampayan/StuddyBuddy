@@ -44,7 +44,6 @@ const markSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Helpful for listing marks by subject for a user
 markSchema.index({ user: 1, subjectId: 1, examDate: -1 });
 
 export default mongoose.model("Mark", markSchema);

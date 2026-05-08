@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/Analytics.jsx
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -14,7 +13,6 @@ const Analytics = () => {
   const { token } = useAuth();
   const { notifyInfo } = useNotification();
 
-  // Live day (YYYY-MM-DD) so page updates after midnight without refresh
   const liveDay = useLiveLocalDay();
 
   const [loading, setLoading] = useState(true);
@@ -73,7 +71,6 @@ const Analytics = () => {
       if (gwData?.success) setGoalWeekly(gwData.days || []);
       else setGoalWeekly([]);
 
-      // Habit completion rate — avg % of habits completed per day this week
       if (hData?.success && Array.isArray(hData.habits) && hData.habits.length > 0) {
         const habits = hData.habits;
         const totalHabits = habits.length;
@@ -90,7 +87,6 @@ const Analytics = () => {
           totalPossible += totalHabits;
 
           habits.forEach((h) => {
-            // backend returns completedDates as Date objects or strings; normalize safely
             const cds = Array.isArray(h.completedDates) ? h.completedDates : [];
             const doneThatDay = cds.some((cd) => yyyyMmDdLocal(new Date(cd)) === ds);
             if (doneThatDay) totalDone += 1;
@@ -111,7 +107,6 @@ const Analytics = () => {
 
   useEffect(() => {
     if (token) fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, liveDay]);
 
   if (loading) {

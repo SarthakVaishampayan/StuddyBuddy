@@ -4,7 +4,6 @@ import { protectRoute } from "./auth.js";
 
 const router = express.Router();
 
-// GET all tasks
 router.get("/", protectRoute, async (req, res) => {
   try {
     const tasks = await Task.find({ user: req.user.userId }).sort({ createdAt: -1 });
@@ -15,7 +14,6 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
-// POST new task
 router.post("/", protectRoute, async (req, res) => {
   try {
     const { text, dueDate } = req.body;
@@ -27,12 +25,11 @@ router.post("/", protectRoute, async (req, res) => {
   }
 });
 
-// PATCH toggle completion status
 router.patch("/:id/toggle", protectRoute, async (req, res) => {
   try {
     const task = await Task.findOne({ _id: req.params.id, user: req.user.userId });
     if (!task) return res.status(404).json({ success: false, message: "Task not found" });
-    
+
     task.completed = !task.completed;
     await task.save();
     res.json({ success: true, task });
@@ -41,7 +38,6 @@ router.patch("/:id/toggle", protectRoute, async (req, res) => {
   }
 });
 
-// DELETE task
 router.delete("/:id", protectRoute, async (req, res) => {
   try {
     const result = await Task.findOneAndDelete({ _id: req.params.id, user: req.user.userId });

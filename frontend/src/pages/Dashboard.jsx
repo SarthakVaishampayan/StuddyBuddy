@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -30,7 +29,6 @@ const Dashboard = () => {
     getTimeStudied,
   } = useTimer();
 
-  // Data
   const [habits, setHabits] = useState([]);
   const [studyStats, setStudyStats] = useState({ today: '0m 0s', totalSeconds: 0, percentChange: 0 });
   const [pendingTasks, setPendingTasks] = useState(0);
@@ -38,7 +36,6 @@ const Dashboard = () => {
   const [reminders, setReminders] = useState([]);
   const [barData, setBarData] = useState([]);
 
-  // UI
   const [showLogDialog, setShowLogDialog] = useState(false);
   const [showHabitModal, setShowHabitModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -46,17 +43,14 @@ const Dashboard = () => {
   const [showTimerSetup, setShowTimerSetup] = useState(false);
   const [deleteHabitId, setDeleteHabitId] = useState(null);
 
-  // Habit calendar
   const [calendarHabit, setCalendarHabit] = useState(null);
 
-  // Forms
   const [newHabitName, setNewHabitName] = useState('');
   const [newTaskText, setNewTaskText] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [reminderForm, setReminderForm] = useState({ text: '', deadline: '' });
   const [timerInput, setTimerInput] = useState(60);
 
-  // IMPORTANT: local live day string (YYYY-MM-DD) that flips at midnight IST
   const todayStr = useLiveLocalDay();
 
   const formatHms = (sec) => {
@@ -111,13 +105,10 @@ const Dashboard = () => {
     }
   };
 
-  // KEY FIX: also refetch when local day changes (midnight IST)
   useEffect(() => {
     if (token) fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, todayStr]);
 
-  // Timer helpers
   const startCountdown = () => {
     const minutes = Math.max(1, parseInt(timerInput || 0, 10));
     const seconds = minutes * 60;
@@ -136,7 +127,6 @@ const Dashboard = () => {
     setElapsedTime(0);
   };
 
-  // API actions
   const handleAddHabit = async (e) => {
     e.preventDefault();
     if (!newHabitName.trim()) return;

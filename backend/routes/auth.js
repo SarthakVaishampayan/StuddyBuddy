@@ -1,4 +1,3 @@
-// File: StudyBuddy/backend/routes/auth.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -6,7 +5,6 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// ─── Middleware ────────────────────────────────────────────────────────────────
 export const protectRoute = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -23,7 +21,6 @@ export const protectRoute = (req, res, next) => {
   }
 };
 
-// ─── POST /api/auth/register ───────────────────────────────────────────────────
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -64,7 +61,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ─── POST /api/auth/login ──────────────────────────────────────────────────────
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -105,7 +101,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ─── GET /api/auth/me ──────────────────────────────────────────────────────────
 router.get("/me", protectRoute, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
@@ -119,7 +114,6 @@ router.get("/me", protectRoute, async (req, res) => {
   }
 });
 
-// ─── PATCH /api/auth/update ────────────────────────────────────────────────────
 router.patch("/update", protectRoute, async (req, res) => {
   try {
     const { name, bio, studyGoal } = req.body;
@@ -152,7 +146,6 @@ router.patch("/update", protectRoute, async (req, res) => {
   }
 });
 
-// ─── PATCH /api/auth/change-password ──────────────────────────────────────────
 router.patch("/change-password", protectRoute, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

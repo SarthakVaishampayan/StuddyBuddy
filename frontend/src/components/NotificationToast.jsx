@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/components/NotificationToast.jsx
 import { useNotification } from '../context/NotificationContext';
 import { Bell, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
@@ -9,14 +8,13 @@ const NotificationToast = () => {
 
   const startAutoClose = useCallback(
     (id) => {
-      // Clear any existing timer for this id first
       if (timersRef.current[id]) {
         clearTimeout(timersRef.current[id]);
       }
       timersRef.current[id] = setTimeout(() => {
         removeToast(id);
         delete timersRef.current[id];
-      }, 3000); // 3 seconds
+      }, 3000);
     },
     [removeToast]
   );
@@ -28,7 +26,6 @@ const NotificationToast = () => {
     }
   }, []);
 
-  // Start auto-close timer whenever a new toast is added
   useEffect(() => {
     toasts.forEach((toast) => {
       if (toast.autoClose !== false && !timersRef.current[toast.id]) {
@@ -37,7 +34,6 @@ const NotificationToast = () => {
     });
   }, [toasts, startAutoClose]);
 
-  // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       Object.values(timersRef.current).forEach((t) => clearTimeout(t));

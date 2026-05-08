@@ -1,4 +1,3 @@
-// File: StudyBuddy/frontend/src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +15,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load user from token on mount / token change
   useEffect(() => {
     const loadUser = async () => {
       if (!token) {
@@ -29,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         });
         const data = await res.json();
         if (data.success) {
-          setUser(data.user); // includes bio, studyGoal from DB
+          setUser(data.user);
         } else {
           logout(false);
         }
@@ -40,7 +38,6 @@ export const AuthProvider = ({ children }) => {
       }
     };
     loadUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const login = async (email, password) => {
@@ -75,8 +72,6 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // Call this after a successful PATCH /api/auth/update
-  // so profile data persists across page navigations
   const updateUser = (updatedFields) => {
     setUser((prev) => ({ ...prev, ...updatedFields }));
   };

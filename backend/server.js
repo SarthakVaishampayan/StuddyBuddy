@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-// Route Imports
 import authRoutes from "./routes/auth.js";
 import habitRoutes from "./routes/habits.js";
 import sessionRoutes from "./routes/sessions.js";
@@ -32,14 +31,13 @@ const connectDB = async () => {
     const conn = await mongoose.connect(
       process.env.MONGODB_URI || "mongodb://localhost:27017/studybuddy"
     );
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`❌ MongoDB Error: ${error.message}`);
+    console.error(`MongoDB Error: ${error.message}`);
     process.exit(1);
   }
 };
 
-// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/habits", habitRoutes);
 app.use("/api/sessions", sessionRoutes);
@@ -47,8 +45,6 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/daily-goal", dailyGoalRoutes);
-
-// NEW
 app.use("/api/marks", marksRoutes);
 app.use("/api/links", linksRoutes);
 app.use("/api/ai", aiRoutes);
@@ -66,7 +62,6 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🧪 Health: http://localhost:${PORT}/api/health`);
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 });

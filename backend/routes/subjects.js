@@ -1,11 +1,9 @@
-// File: StudyBuddy/backend/routes/subjects.js
 import express from 'express';
 import Subject from '../models/Subject.js';
 import { protectRoute } from './auth.js';
 
 const router = express.Router();
 
-// GET all subjects for logged-in user
 router.get('/', protectRoute, async (req, res) => {
   try {
     const subjects = await Subject.find({ user: req.user.userId }).sort({ createdAt: -1 });
@@ -15,7 +13,6 @@ router.get('/', protectRoute, async (req, res) => {
   }
 });
 
-// POST create a new subject
 router.post('/', protectRoute, async (req, res) => {
   try {
     const { name, emoji, color, priority, notes } = req.body;
@@ -31,7 +28,6 @@ router.post('/', protectRoute, async (req, res) => {
   }
 });
 
-// DELETE a subject
 router.delete('/:id', protectRoute, async (req, res) => {
   try {
     const subject = await Subject.findOneAndDelete({
@@ -45,7 +41,6 @@ router.delete('/:id', protectRoute, async (req, res) => {
   }
 });
 
-// POST add a topic to a subject
 router.post('/:id/topics', protectRoute, async (req, res) => {
   try {
     const { title } = req.body;
@@ -62,7 +57,6 @@ router.post('/:id/topics', protectRoute, async (req, res) => {
   }
 });
 
-// PATCH toggle a topic done/undone
 router.patch('/:id/topics/:topicId', protectRoute, async (req, res) => {
   try {
     const subject = await Subject.findOne({ _id: req.params.id, user: req.user.userId });
@@ -79,7 +73,6 @@ router.patch('/:id/topics/:topicId', protectRoute, async (req, res) => {
   }
 });
 
-// DELETE a topic from a subject
 router.delete('/:id/topics/:topicId', protectRoute, async (req, res) => {
   try {
     const subject = await Subject.findOne({ _id: req.params.id, user: req.user.userId });

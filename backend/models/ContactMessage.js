@@ -5,7 +5,7 @@ const contactMessageSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false, // allow anonymous (but we will usually send logged-in)
+      required: false,
     },
     name: {
       type: String,

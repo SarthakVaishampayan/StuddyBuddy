@@ -1,11 +1,9 @@
-// File: StudyBuddy/backend/routes/habits.js
 import express from 'express';
 import Habit from '../models/Habit.js';
 import { protectRoute } from './auth.js';
 
 const router = express.Router();
 
-// Local YYYY-MM-DD (server timezone; fine for localhost India dev)
 const yyyyMmDdLocal = (d = new Date()) => {
   const x = new Date(d);
   x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
@@ -14,7 +12,6 @@ const yyyyMmDdLocal = (d = new Date()) => {
 
 const todayStr = () => yyyyMmDdLocal(new Date());
 
-// ── GET all habits ──────────────────────────────────────────────────────────
 router.get('/', protectRoute, async (req, res) => {
   try {
     const habits = await Habit.find({ user: req.user.userId }).sort({ createdAt: 1 });
@@ -44,7 +41,6 @@ router.get('/', protectRoute, async (req, res) => {
   }
 });
 
-// ── POST create habit ───────────────────────────────────────────────────────
 router.post('/', protectRoute, async (req, res) => {
   try {
     const { name, emoji, color } = req.body;
@@ -75,7 +71,6 @@ router.post('/', protectRoute, async (req, res) => {
   }
 });
 
-// ── PATCH toggle today ──────────────────────────────────────────────────────
 router.patch('/:id/toggle', protectRoute, async (req, res) => {
   try {
     const habit = await Habit.findOne({ _id: req.params.id, user: req.user.userId });
@@ -91,7 +86,6 @@ router.patch('/:id/toggle', protectRoute, async (req, res) => {
         d => yyyyMmDdLocal(d) !== today
       );
     } else {
-      // Keep exact behavior: push "now"; streak logic uses local day string later
       habit.completedDates.push(new Date());
     }
 
@@ -115,7 +109,6 @@ router.patch('/:id/toggle', protectRoute, async (req, res) => {
   }
 });
 
-// ── DELETE habit ────────────────────────────────────────────────────────────
 router.delete('/:id', protectRoute, async (req, res) => {
   try {
     const habit = await Habit.findOneAndDelete({
@@ -130,7 +123,6 @@ router.delete('/:id', protectRoute, async (req, res) => {
   }
 });
 
-// ── GET calendar data for a habit ──────────────────────────────────────────
 router.get('/:id/calendar', protectRoute, async (req, res) => {
   try {
     const habit = await Habit.findOne({ _id: req.params.id, user: req.user.userId });

@@ -9,10 +9,9 @@ const isNonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
 
 const ensureSubjectOwner = async ({ subjectId, userId }) => {
   const subject = await Subject.findOne({ _id: subjectId, user: userId });
-  return subject; // null if not owned / not found
+  return subject;
 };
 
-// GET /api/marks?subjectId=...
 router.get("/", protectRoute, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -29,7 +28,6 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
-// POST /api/marks  { subjectId, examName, score, outOf, examDate, note }
 router.post("/", protectRoute, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -77,7 +75,6 @@ router.post("/", protectRoute, async (req, res) => {
   }
 });
 
-// DELETE /api/marks/:id
 router.delete("/:id", protectRoute, async (req, res) => {
   try {
     const userId = req.user.userId;

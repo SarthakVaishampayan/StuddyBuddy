@@ -10,16 +10,10 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
-const locales = {
-  'en-US': enUS,
-};
+const locales = { 'en-US': enUS };
 
 const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
+  format, parse, startOfWeek, getDay, locales,
 });
 
 const formatDuration = (seconds) => {
@@ -36,12 +30,9 @@ const GlobalCalendar = () => {
   const { token } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Controlled calendar states
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState('month');
   const [selectedEvent, setSelectedEvent] = useState(null);
-
   const [reminders, setReminders] = useState([]);
 
   useEffect(() => {
@@ -74,26 +65,24 @@ const GlobalCalendar = () => {
       }
     };
 
-    if (token) {
-      fetchCalendar();
-    }
+    if (token) fetchCalendar();
   }, [token]);
 
   const eventStyleGetter = (event) => {
-    const backgroundColor = event.color || '#3174ad';
-    const style = {
-      backgroundColor,
-      borderRadius: '6px',
-      opacity: 0.9,
-      color: 'white',
-      border: '0px',
-      display: 'block',
-      padding: '2px 5px',
-      fontWeight: 'bold',
-      fontSize: '12px',
-      maxWidth: 'fit-content',
+    return {
+      style: {
+        backgroundColor: event.color || '#3174ad',
+        borderRadius: '6px',
+        opacity: 0.9,
+        color: 'white',
+        border: '0px',
+        display: 'block',
+        padding: '2px 5px',
+        fontWeight: 'bold',
+        fontSize: '12px',
+        maxWidth: 'fit-content',
+      }
     };
-    return { style };
   };
 
   const generateTooltipForDate = useCallback((date) => {
@@ -125,13 +114,10 @@ const GlobalCalendar = () => {
     return tip;
   }, [events]);
 
-  const dayPropGetter = (date) => {
-    return {
-      title: generateTooltipForDate(date),
-    };
-  };
+  const dayPropGetter = (date) => ({
+    title: generateTooltipForDate(date),
+  });
 
-  // Drill down from month → day view when clicking a date number
   const handleDrillDown = useCallback((date) => {
     setCurrentDate(date);
     setCurrentView('day');
@@ -139,24 +125,18 @@ const GlobalCalendar = () => {
 
   const components = {
     month: {
-      dateHeader: ({ date, label }) => {
-        return (
-          <div
-            className="cal-date-header"
-            title={`Click to expand ${format(date, 'MMM d')} · ` + generateTooltipForDate(date)}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDrillDown(date);
-            }}
-          >
-            <span className="cal-date-num">{label}</span>
-          </div>
-        );
-      },
+      dateHeader: ({ date, label }) => (
+        <div
+          className="cal-date-header"
+          title={`Click to expand ${format(date, 'MMM d')} · ` + generateTooltipForDate(date)}
+          onClick={(e) => { e.stopPropagation(); handleDrillDown(date); }}
+        >
+          <span className="cal-date-num">{label}</span>
+        </div>
+      ),
     },
   };
 
-  // Helper for the modal
   const getTypeLabel = (type) => {
     const labels = {
       habit: '🌟 Habit',
@@ -207,7 +187,6 @@ const GlobalCalendar = () => {
         </div>
       </div>
 
-      {/* Event Details Modal */}
       {selectedEvent && (
         <div
           className="modal show d-block"
@@ -216,7 +195,6 @@ const GlobalCalendar = () => {
         >
           <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 rounded-4 shadow-lg">
-              {/* Colored header bar */}
               <div
                 style={{
                   height: '6px',
@@ -234,29 +212,22 @@ const GlobalCalendar = () => {
                 <h5 className="fw-bold text-dark mb-3">{selectedEvent.title}</h5>
                 <table className="table table-borderless mb-0" style={{ fontSize: '14px' }}>
                   <tbody>
-                    {/* Date */}
                     <tr>
                       <td className="fw-semibold text-muted" style={{ width: '110px' }}>📅 Date</td>
                       <td>{format(selectedEvent.start, 'EEEE, MMM d, yyyy')}</td>
                     </tr>
-
-                    {/* Time (for non-allDay events) */}
                     {!selectedEvent.allDay && (
                       <tr>
                         <td className="fw-semibold text-muted">🕐 Time</td>
                         <td>{format(selectedEvent.start, 'h:mm a')}</td>
                       </tr>
                     )}
-
-                    {/* Duration for study sessions */}
                     {selectedEvent.type === 'session' && (
                       <tr>
                         <td className="fw-semibold text-muted">⏱️ Duration</td>
                         <td>{formatDuration(selectedEvent.duration)}</td>
                       </tr>
                     )}
-
-                    {/* Task status */}
                     {selectedEvent.type === 'task' && (
                       <tr>
                         <td className="fw-semibold text-muted">📋 Status</td>
