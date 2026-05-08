@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
@@ -14,8 +16,6 @@ import marksRoutes from "./routes/marks.js";
 import linksRoutes from "./routes/links.js";
 import aiRoutes from "./routes/ai.js";
 import calendarRoutes from "./routes/calendar.js";
-
-dotenv.config();
 const app = express();
 
 app.use(

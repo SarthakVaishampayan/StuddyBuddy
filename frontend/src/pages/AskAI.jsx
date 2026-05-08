@@ -14,6 +14,7 @@ const AskAI = () => {
   
   const [query, setQuery] = useState('');
   const [result, setResult] = useState('');
+  const [quizData, setQuizData] = useState(null);
   const [error, setError] = useState('');
   const [processingTime, setProcessingTime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -144,6 +145,7 @@ const AskAI = () => {
     setIsProcessing(true);
     setError('');
     setResult('');
+    setQuizData(null);
 
     try {
       const res = await fetch('http://localhost:5000/api/ai/action', {
@@ -161,7 +163,19 @@ const AskAI = () => {
         throw new Error(data.message || 'Action failed');
       }
       
-      setResult(data.result);
+      if (actionType === 'quiz') {
+        try {
+          // Strip possible markdown code fences just in case
+          const cleaned = data.result.replace(/```json|```/g, '').trim();
+          const parsed = JSON.parse(cleaned);
+          setQuizData(parsed);
+        } catch {
+          // Fallback: render as markdown if JSON parsing fails
+          setResult(data.result);
+        }
+      } else {
+        setResult(data.result);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -176,6 +190,7 @@ const AskAI = () => {
     setIsProcessing(true);
     setError('');
     setResult('');
+    setQuizData(null);
 
     try {
       const res = await fetch('http://localhost:5000/api/ai/ask', {
@@ -200,6 +215,108 @@ const AskAI = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // ── Interactive Quiz Component ─────────────────────────────────────────
+  const QuizRenderer = ({ questions }) => {
+    const [selected, setSelected] = React.useState({});
+    const [submitted, setSubmitted] = React.useState(false);
+    const [score, setScore] = React.useState(0);
+
+    const handleSelect = (qIdx, letter) => {
+      if (submitted) return;
+      setSelected(prev => ({ ...prev, [qIdx]: letter }));
+    };
+
+    const handleSubmit = () => {
+      let s = 0;
+      questions.forEach((q, i) => { if (selected[i] === q.answer) s++; });
+      setScore(s);
+      setSubmitted(true);
+    };
+
+    const handleRetry = () => {
+      setSelected({});
+      setSubmitted(false);
+      setScore(0);
+    };
+
+    const pct = submitted ? Math.round((score / questions.length) * 100) : 0;
+    const scoreColor = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+
+    return (
+      <div>
+        <div className="d-flex align-items-center justify-content-between mb-4">
+          <h6 className="fw-bold mb-0 d-flex align-items-center gap-2">
+            <Brain size={18} className="text-success" /> Quiz ({questions.length} Questions)
+          </h6>
+          {submitted && (
+            <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" onClick={handleRetry}>↩ Retry</button>
+          )}
+        </div>
+
+        {submitted && (
+          <div className="rounded-3 p-4 mb-4 text-center" style={{ background: `${scoreColor}18`, border: `2px solid ${scoreColor}` }}>
+            <div className="fw-bold mb-1" style={{ fontSize: '2rem', color: scoreColor }}>{score}/{questions.length}</div>
+            <div className="fw-medium" style={{ color: scoreColor }}>
+              {pct >= 80 ? '🎉 Excellent work!' : pct >= 50 ? '👍 Good effort, keep practising!' : '📚 Review the material and try again.'}
+            </div>
+          </div>
+        )}
+
+        <div className="d-flex flex-column gap-4">
+          {questions.map((q, qi) => {
+            const userAns = selected[qi];
+            const isCorrect = submitted && userAns === q.answer;
+            const isWrong   = submitted && userAns && userAns !== q.answer;
+            return (
+              <div key={qi} className="rounded-3 p-3" style={{ background: submitted ? (isCorrect ? '#f0fdf4' : isWrong ? '#fef2f2' : '#f9fafb') : '#f9fafb', border: '1px solid', borderColor: submitted ? (isCorrect ? '#86efac' : isWrong ? '#fca5a5' : '#e5e7eb') : '#e5e7eb' }}>
+                <p className="fw-semibold mb-3" style={{ fontSize: '15px' }}>
+                  <span className="badge bg-primary me-2" style={{ fontSize: '12px' }}>Q{qi + 1}</span>
+                  {q.question}
+                </p>
+                <div className="d-flex flex-column gap-2">
+                  {q.options.map((opt) => {
+                    const letter = opt.charAt(0);
+                    const isSelected = userAns === letter;
+                    const isAnswer   = submitted && q.answer === letter;
+                    let bg = 'white', border = '#dee2e6', color = '#1f2937', fw = 'normal';
+                    if (isSelected && !submitted) { bg = '#eff6ff'; border = '#3b82f6'; color = '#1d4ed8'; fw = '600'; }
+                    if (isAnswer)                 { bg = '#f0fdf4'; border = '#22c55e'; color = '#15803d'; fw = '600'; }
+                    if (isSelected && !isAnswer && submitted) { bg = '#fef2f2'; border = '#ef4444'; color = '#b91c1c'; fw = '600'; }
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => handleSelect(qi, letter)}
+                        className="text-start rounded-3 px-3 py-2 border w-100"
+                        style={{ background: bg, borderColor: border, color, fontWeight: fw, cursor: submitted ? 'default' : 'pointer', transition: 'all 0.15s' }}
+                      >
+                        {opt}
+                        {isAnswer && <span className="float-end">✅</span>}
+                        {isSelected && !isAnswer && submitted && <span className="float-end">❌</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {submitted && isWrong && (
+                  <p className="mb-0 mt-2 small" style={{ color: '#15803d' }}>✔ Correct answer: <strong>{q.answer}</strong></p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {!submitted && (
+          <button
+            className="btn btn-success mt-4 px-4 py-2 fw-bold rounded-pill w-100"
+            onClick={handleSubmit}
+            disabled={Object.keys(selected).length < questions.length}
+          >
+            Submit Quiz
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -371,6 +488,8 @@ const AskAI = () => {
                         <p className="small mb-0 text-muted fw-medium">Elapsed time: {processingTime}s</p>
                         <style>{`@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
                      </div>
+                  ) : quizData ? (
+                    <QuizRenderer questions={quizData} />
                   ) : result ? (
                     <div className="h-100">
                       <div className="d-flex justify-content-end mb-3 sticky-top bg-light pb-2" style={{ top: '-10px', zIndex: 10 }}>
