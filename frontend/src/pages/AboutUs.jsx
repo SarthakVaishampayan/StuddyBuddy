@@ -23,6 +23,7 @@ const AboutUs = () => {
     subject: '',
     type: 'bug',
     message: '',
+    botcheck: '',
   });
 
   useEffect(() => {
@@ -118,9 +119,34 @@ const AboutUs = () => {
 
     try {
       setSubmitting(true);
-      await new Promise((r) => setTimeout(r, 500));
-      notifyInfo('Contact form is ready. Email sending will be enabled in the next update (EmailJS).');
-      setForm((prev) => ({ ...prev, subject: '', type: 'bug', message: '' }));
+      const accessKey = import.meta.env?.VITE_WEB3FORMS_KEY;
+      if (!accessKey) {
+        notifyError('Web3Forms key missing. Add VITE_WEB3FORMS_KEY in frontend/.env and restart frontend.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('access_key', accessKey);
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('subject', `[${form.type}] ${form.subject}`);
+      formData.append('message', form.message);
+      formData.append('botcheck', form.botcheck);
+      formData.append('app', 'StudyBuddy');
+      formData.append('page', 'AboutUs');
+
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        notifyInfo('Sent! Check your email (Web3Forms).');
+        setForm((prev) => ({ ...prev, subject: '', type: 'bug', message: '', botcheck: '' }));
+      } else {
+        notifyError(data.message || 'Failed to send. Please try again.');
+      }
     } catch (err) {
       console.error(err);
       notifyError('Failed to submit. Please try again.');
@@ -336,7 +362,7 @@ const AboutUs = () => {
               <MessageSquare size={20} className="text-primary" />
               Contact / Report Bug / Query
             </h5>
-            <span className="text-muted small">Replies: coming via EmailJS (next update)</span>
+            <span className="text-muted small">Delivery: Web3Forms</span>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -404,6 +430,15 @@ const AboutUs = () => {
               </div>
             </div>
 
+            <input
+              type="text"
+              value={form.botcheck}
+              onChange={(e) => onChange('botcheck', e.target.value)}
+              style={{ display: 'none' }}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+
             <div className="mt-4 d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2 text-muted small">
                 <Bug size={14} />
@@ -419,10 +454,6 @@ const AboutUs = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-3 text-muted small">
-            Note: Email sending is intentionally disabled right now. We'll enable it using EmailJS in the next update.
-          </div>
         </div>
       </div>
     </div>
