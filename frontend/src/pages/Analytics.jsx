@@ -120,62 +120,62 @@ const Analytics = () => {
   const streakDays = weeklyData.filter(d => (d.rawSeconds || 0) > 0).length;
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
-        <h2 className="fw-bold mb-4 mt-3">Study Insights</h2>
+      <div className="p-4 px-lg-5 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3 gradient-text">Study Insights</h2>
 
         <div className="row g-3 mb-4">
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 border shadow-sm">
+            <div className="stat-tile">
               <div className="d-flex align-items-center gap-2 mb-2 text-primary">
                 <Clock size={18} />
                 <span className="small fw-bold text-uppercase">Weekly Total</span>
               </div>
-              <h4 className="fw-bold text-dark mb-0">{formatHms(totalSec)}</h4>
-              <p className="text-muted small mt-1 mb-0">Focus time this week</p>
+              <h4 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>{formatHms(totalSec)}</h4>
+              <p className="small mt-1 mb-0" style={{ color: 'var(--text-secondary)' }}>Focus time this week</p>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 border shadow-sm">
+            <div className="stat-tile">
               <div className="d-flex align-items-center gap-2 mb-2 text-success">
                 <Calendar size={18} />
                 <span className="small fw-bold text-uppercase">Consistency</span>
               </div>
-              <h4 className="fw-bold text-dark mb-0">{streakDays} / 7 Days</h4>
-              <p className="text-muted small mt-1 mb-0">Days with study activity</p>
+              <h4 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>{streakDays} / 7 Days</h4>
+              <p className="small mt-1 mb-0" style={{ color: 'var(--text-secondary)' }}>Days with study activity</p>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 border shadow-sm">
+            <div className="stat-tile">
               <div className="d-flex align-items-center gap-2 mb-2" style={{ color: '#ea580c' }}>
                 <Flame size={18} />
                 <span className="small fw-bold text-uppercase">Goal Streak</span>
               </div>
-              <h4 className="fw-bold text-dark mb-0">{goalStreak} Days</h4>
-              <p className="text-muted small mt-1 mb-0">
+              <h4 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>{goalStreak} Days</h4>
+              <p className="small mt-1 mb-0" style={{ color: 'var(--text-secondary)' }}>
                 Best: <strong>{longestStreak} days</strong>
               </p>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 border shadow-sm">
+            <div className="stat-tile">
               <div className="d-flex align-items-center gap-2 mb-2 text-info">
                 <TrendingUp size={18} />
                 <span className="small fw-bold text-uppercase">Habit Rate</span>
               </div>
-              <h4 className="fw-bold text-dark mb-0">{habitRate}%</h4>
-              <p className="text-muted small mt-1 mb-0">Avg habits done / day</p>
+              <h4 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>{habitRate}%</h4>
+              <p className="small mt-1 mb-0" style={{ color: 'var(--text-secondary)' }}>Avg habits done / day</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-4 border shadow-sm mb-4">
-          <h6 className="fw-bold mb-4">Focus Duration Trend (Hours)</h6>
+        <div className="card-premium p-4 mb-4">
+          <h6 className="fw-bold mb-4" style={{ color: 'var(--text-primary)' }}>Focus Duration Trend (Hours)</h6>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyData}>
@@ -226,9 +226,9 @@ const Analytics = () => {
         </div>
 
         {goalWeekly.length > 0 && goalWeekly.some(d => (d.goalSeconds || 0) > 0) && (
-          <div className="bg-white p-4 rounded-4 border shadow-sm">
-            <h6 className="fw-bold mb-1">Goal vs Actual Study Time</h6>
-            <p className="text-muted small mb-4">
+          <div className="card-premium p-4">
+            <h6 className="fw-bold mb-1" style={{ color: 'var(--text-primary)' }}>Goal vs Actual Study Time</h6>
+            <p className="small mb-4" style={{ color: 'var(--text-secondary)' }}>
               How your daily logged time compares to your set goals.
             </p>
             <div style={{ width: '100%', height: 280 }}>

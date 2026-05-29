@@ -75,16 +75,16 @@ const Todo = () => {
   todayStart.setHours(0, 0, 0, 0);
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
-      <div className="p-4 px-lg-5">
-        <h2 className="fw-bold mb-4 mt-3">Tasks & Deadlines</h2>
+      <div className="p-4 px-lg-5 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3" style={{ color: 'var(--text-primary)' }}><span className="gradient-text">Tasks</span> & Deadlines</h2>
 
         <div className="row g-4">
           {/* TASK LIST SECTION */}
           <div className="col-lg-7">
-            <div className="bg-white p-4 rounded-4 shadow-sm border mb-4">
-              <h5 className="fw-bold mb-4 d-flex align-items-center gap-2">
+            <div className="card-premium p-4 mb-4">
+              <h5 className="fw-bold mb-4 d-flex align-items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 <CheckCircle2 className="text-primary" /> Daily Tasks
               </h5>
               <form onSubmit={addTask} className="d-flex flex-wrap gap-2 mb-4">
@@ -158,7 +158,7 @@ const Todo = () => {
 
           {/* REMINDERS/DEADLINES SECTION */}
           <div className="col-lg-5">
-            <div className="bg-white p-4 rounded-4 shadow-sm border">
+            <div className="card-premium p-4">
               <h5 className="fw-bold mb-4 d-flex align-items-center gap-2 text-danger">
                 <Calendar /> Deadlines
               </h5>

@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Search, Settings, Menu } from 'lucide-react';
+import { Bell, Search, Settings, Menu, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = ({ notifications = [] }) => {
   const [showNotif, setShowNotif] = useState(false);
   const notifRef = useRef(null);
   const navigate = useNavigate();
+  const { theme, toggleTheme, isDark } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -27,7 +29,7 @@ const Navbar = ({ notifications = [] }) => {
 
   return (
     <nav
-      className="bg-white border-bottom px-4 py-2 d-flex justify-content-between align-items-center sticky-top shadow-sm"
+      className="studybuddy-navbar px-4 py-2 d-flex justify-content-between align-items-center sticky-top"
       style={{ zIndex: 100 }}
     >
       <div className="d-flex align-items-center gap-2">
@@ -57,6 +59,17 @@ const Navbar = ({ notifications = [] }) => {
         </div>
 
         {/* Notification Bell */}
+        {/* Dark Mode Toggle */}
+        <button
+          className="btn btn-light rounded-circle shadow-sm position-relative"
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          type="button"
+          style={{ transition: 'all 0.2s ease' }}
+        >
+          {isDark ? <Sun size={20} className="text-warning" /> : <Moon size={20} className="text-primary" />}
+        </button>
+
         <div className="position-relative" ref={notifRef}>
           <button
             className={`btn rounded-circle shadow-sm position-relative ${

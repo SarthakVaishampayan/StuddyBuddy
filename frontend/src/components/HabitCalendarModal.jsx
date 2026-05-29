@@ -81,12 +81,11 @@ const HabitCalendarModal = ({ habit, onClose }) => {
 
   return (
     <div
-      className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, backdropFilter: 'blur(4px)' }}
+      className="modal-premium-overlay"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-4 shadow-lg p-4"
+        className="modal-premium-content"
         style={{ width: '420px', maxWidth: '95vw' }}
         onClick={(e) => e.stopPropagation()}
       >

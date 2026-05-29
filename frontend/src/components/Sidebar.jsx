@@ -16,7 +16,7 @@ const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const menuItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
     { name: 'Analytics', icon: <BookOpen size={20} />,        path: '/analytics' },
     { name: 'Subjects',  icon: <Book size={20} />,            path: '/subjects' },
     { name: 'Calendar',  icon: <Calendar size={20} />,        path: '/calendar' },
@@ -78,7 +78,7 @@ const Sidebar = () => {
       )}
 
       <div
-        className={`bg-white border-end d-flex flex-column transition-all studybuddy-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}
+        className={`border-end d-flex flex-column transition-all studybuddy-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}
         style={{
           width: isCollapsed ? '80px' : '260px',
           transition: 'width 0.3s, transform 0.3s ease',

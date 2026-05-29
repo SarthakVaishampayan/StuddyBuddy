@@ -217,23 +217,23 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
-        <h2 className="fw-bold mb-4 mt-3 text-dark">
-          Hello, {user?.name?.split(' ')[0] || 'Student'}! 👋
+      <div className="p-4 px-lg-5 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3" style={{ color: 'var(--text-primary)' }}>
+          Hello, <span className="gradient-text">{user?.name?.split(' ')[0] || 'Student'}</span>! 👋
         </h2>
 
         {/* TOP TILES */}
         <div className="row g-4 mb-4">
           {/* Tasks */}
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
+            <div className="stat-tile h-100">
               <div className="d-flex justify-content-between align-items-start">
-                <h6 className="text-muted small fw-bold text-uppercase">Tasks Pending</h6>
+                <h6 className="small fw-bold text-uppercase" style={{ color: 'var(--text-secondary)' }}>Tasks Pending</h6>
                 <button
-                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2"
+                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2 btn-icon-hover"
                   onClick={() => setShowTaskModal(true)}
                   title="Add task"
                   type="button"
@@ -241,7 +241,7 @@ const Dashboard = () => {
                   <Plus size={16} className="text-primary" />
                 </button>
               </div>
-              <h1 className="fw-bold my-3 display-5">{pendingTasks}</h1>
+              <h1 className="fw-bold my-3 display-5" style={{ color: 'var(--text-primary)' }}>{pendingTasks}</h1>
               <span className="text-primary small fw-bold" style={{ cursor: 'pointer' }} onClick={() => navigate('/todo')}>
                 View full list &rarr;
               </span>
@@ -250,11 +250,11 @@ const Dashboard = () => {
 
           {/* Reminders */}
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
+            <div className="stat-tile h-100">
               <div className="d-flex justify-content-between align-items-start">
-                <h6 className="text-muted small fw-bold text-uppercase">Reminders</h6>
+                <h6 className="small fw-bold text-uppercase" style={{ color: 'var(--text-secondary)' }}>Reminders</h6>
                 <button
-                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2"
+                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2 btn-icon-hover"
                   onClick={() => setShowReminderModal(true)}
                   title="Add reminder"
                   type="button"
@@ -271,9 +271,9 @@ const Dashboard = () => {
 
           {/* Study Today */}
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
-              <h6 className="text-muted small fw-bold text-uppercase">Study Today</h6>
-              <h1 className="fw-bold text-primary my-3 display-6">{studyStats.today}</h1>
+            <div className="stat-tile h-100">
+              <h6 className="small fw-bold text-uppercase" style={{ color: 'var(--text-secondary)' }}>Study Today</h6>
+              <h1 className="fw-bold my-3 display-6 gradient-text">{studyStats.today}</h1>
               <p className={`small mb-0 fw-bold ${studyStats.percentChange >= 0 ? 'text-success' : 'text-danger'}`}>
                 {studyStats.percentChange >= 0 ? '▲' : '▼'} {Math.abs(studyStats.percentChange)}% vs yesterday
               </p>
@@ -282,12 +282,13 @@ const Dashboard = () => {
 
           {/* Timer */}
           <div className="col-md-3">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100 text-center d-flex flex-column justify-content-center align-items-center position-relative">
+            <div className="stat-tile h-100 text-center d-flex flex-column justify-content-center align-items-center position-relative">
               {/* Mode switch */}
               <div className="position-absolute top-0 end-0 p-3 d-flex gap-2">
                 <button
                   type="button"
-                  className={`btn btn-sm rounded-circle p-1 border-0 ${mode === 'stopwatch' ? 'bg-primary text-white' : 'text-muted'}`}
+                  className={`btn btn-sm rounded-circle p-1 border-0 ${mode === 'stopwatch' ? 'bg-primary text-white' : ''}`}
+                  style={{ color: mode === 'stopwatch' ? 'white' : 'var(--text-muted)' }}
                   onClick={switchToStopwatch}
                   title="Stopwatch"
                 >
@@ -295,7 +296,8 @@ const Dashboard = () => {
                 </button>
                 <button
                   type="button"
-                  className={`btn btn-sm rounded-circle p-1 border-0 ${mode === 'timer' ? 'bg-primary text-white' : 'text-muted'}`}
+                  className={`btn btn-sm rounded-circle p-1 border-0 ${mode === 'timer' ? 'bg-primary text-white' : ''}`}
+                  style={{ color: mode !== 'timer' ? 'var(--text-muted)' : 'white' }}
                   onClick={() => { setTimerRunning(false); setShowTimerSetup(true); }}
                   title="Countdown"
                 >
@@ -303,11 +305,11 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <h6 className="text-muted small fw-bold text-uppercase mb-2">
+              <h6 className="small fw-bold text-uppercase mb-2" style={{ color: 'var(--text-secondary)' }}>
                 {mode === 'stopwatch' ? 'Stopwatch' : 'Countdown'}
               </h6>
 
-              <div className={`h1 fw-bold mb-3 font-monospace ${mode === 'timer' && elapsedTime <= 300 ? 'text-danger' : 'text-dark'}`}>
+              <div className="h1 fw-bold mb-3 font-monospace animate-pulseGlow" style={{ color: mode === 'timer' && elapsedTime <= 300 ? 'var(--danger-500)' : 'var(--text-primary)' }}>
                 {formatClock(elapsedTime)}
               </div>
 
@@ -336,9 +338,9 @@ const Dashboard = () => {
         <div className="row g-4">
           {/* Graph */}
           <div className="col-lg-8">
-            <div className="bg-white p-4 rounded-4 shadow-sm border" style={{ minHeight: 430 }}>
+            <div className="card-premium p-4" style={{ minHeight: 430 }}>
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h6 className="fw-bold mb-0">Study Activity (Last 7 Days)</h6>
+                <h6 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>Study Activity (Last 7 Days)</h6>
               </div>
 
               <div style={{ width: '100%', height: 320 }}>
@@ -386,12 +388,12 @@ const Dashboard = () => {
 
           {/* Habits */}
           <div className="col-lg-4">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
+            <div className="card-premium p-4 h-100">
               <div className="d-flex justify-content-between mb-3 align-items-center">
-                <h6 className="fw-bold mb-0">Daily Habits</h6>
+                <h6 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>Daily Habits</h6>
                 <button
                   type="button"
-                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2"
+                  className="btn btn-sm btn-light border rounded-circle shadow-sm p-2 btn-icon-hover"
                   onClick={() => setShowHabitModal(true)}
                   title="Add habit"
                 >
@@ -403,14 +405,18 @@ const Dashboard = () => {
                 {habits.length === 0 ? (
                   <p className="text-muted small text-center my-4">No habits yet. Click + to add one.</p>
                 ) : (
-                  habits.map(h => (
+                  habits.map((h, idx) => (
                     <div
                       key={h._id}
-                      className="d-flex justify-content-between align-items-center p-3 border rounded-4"
-                      style={{ backgroundColor: h.completedToday ? '#f0fdf4' : '#fafafa' }}
+                      className="d-flex justify-content-between align-items-center p-3 border rounded-4 hover-lift"
+                      style={{ 
+                        backgroundColor: h.completedToday ? 'var(--success-50)' : 'var(--bg-subtle)',
+                        borderColor: h.completedToday ? 'var(--success-500)' : 'var(--border-light)',
+                        animation: `fadeInUp 0.3s ease ${0.05 * idx}s both`,
+                      }}
                     >
                       <div style={{ minWidth: 0 }}>
-                        <div className="fw-bold small text-dark text-truncate">
+                        <div className="fw-bold small text-truncate" style={{ color: 'var(--text-primary)' }}>
                           {h.emoji} {h.name}
                         </div>
                         <div
@@ -424,11 +430,11 @@ const Dashboard = () => {
                             className="fw-bold"
                             style={{
                               fontSize: '12px',
-                              color: h.streak > 0 ? '#ea580c' : '#9ca3af',
+                              color: h.streak > 0 ? '#ea580c' : 'var(--text-muted)',
                               textDecoration: 'underline dotted',
                             }}
                           >
-                            {h.streak} day streak
+                            {h.streak > 0 ? `${h.streak} day streak` : 'No streak yet'}
                           </span>
                         </div>
                       </div>
@@ -467,8 +473,8 @@ const Dashboard = () => {
 
       {/* TIMER SETUP MODAL */}
       {showTimerSetup && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(5px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 360 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content text-center" style={{ width: 360 }}>
             <Hourglass size={44} className="text-primary mb-2" />
             <h5 className="fw-bold mb-3">Set Countdown</h5>
 
@@ -504,8 +510,8 @@ const Dashboard = () => {
 
       {/* LOG MODAL */}
       {showLogDialog && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(5px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 380 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content text-center" style={{ width: 380 }}>
             <h5 className="fw-bold mb-2">
               Log {formatHms(getTimeStudied?.() ?? 0)}?
             </h5>
@@ -547,8 +553,8 @@ const Dashboard = () => {
 
       {/* ADD HABIT MODAL */}
       {showHabitModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">New Habit</h5>
             <form onSubmit={handleAddHabit}>
               <input
@@ -574,8 +580,8 @@ const Dashboard = () => {
 
       {/* ADD TASK MODAL */}
       {showTaskModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">Add Task</h5>
             <form onSubmit={handleAddTask}>
               <input
@@ -608,8 +614,8 @@ const Dashboard = () => {
 
       {/* ADD REMINDER MODAL */}
       {showReminderModal && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg" style={{ width: 380 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content" style={{ width: 380 }}>
             <h5 className="fw-bold mb-3">Set Reminder</h5>
             <form onSubmit={handleAddReminder}>
               <input
@@ -643,8 +649,8 @@ const Dashboard = () => {
 
       {/* DELETE HABIT MODAL */}
       {deleteHabitId && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 9999, backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ width: 350 }}>
+        <div className="modal-premium-overlay">
+          <div className="modal-premium-content text-center" style={{ width: 350 }}>
             <AlertCircle size={48} className="text-danger mb-2" />
             <h5 className="fw-bold mb-2">Delete habit?</h5>
             <p className="text-muted small mb-3">This action can’t be undone.</p>

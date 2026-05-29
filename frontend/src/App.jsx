@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Sidebar    from './components/Sidebar';
+import Landing    from './pages/Landing';
 import Dashboard  from './pages/Dashboard';
 import Analytics  from './pages/Analytics';
 import Todo       from './pages/ToDo';
@@ -17,6 +18,7 @@ import GlobalCalendar from './pages/GlobalCalendar';
 import { AuthProvider, useAuth }                   from './context/AuthContext';
 import { TimerProvider, useTimer }                 from './context/TimerContext';
 import { NotificationProvider, useNotification }   from './context/NotificationContext';
+import { ThemeProvider }                           from './context/ThemeContext';
 import NotificationToast                           from './components/NotificationToast';
 
 import { Save, RotateCcw, Trash2, AlertCircle } from 'lucide-react';
@@ -33,9 +35,15 @@ const Placeholder = ({ title }) => (
 
 const MainLayout = ({ children }) => {
   const { user } = useAuth();
+  const location = useLocation();
+  // Landing page at '/' uses its own layout — don't wrap in app chrome
+  const isAppView = user && location.pathname !== '/';
+  if (!isAppView) {
+    return <>{children}</>;
+  }
   return (
-    <div className="d-flex min-vh-100 bg-light">
-      {user && <Sidebar />}
+    <div className="d-flex min-vh-100" style={{ backgroundColor: 'var(--bg-base)' }}>
+      <Sidebar />
       <main className="flex-grow-1 overflow-auto" style={{ height: '100vh' }}>
         {children}
       </main>
@@ -112,12 +120,11 @@ const GlobalTimerFinishModal = () => {
 
   return (
     <div
-      className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center"
-      style={{ zIndex: 9999, backdropFilter: 'blur(6px)' }}
+      className="modal-premium-overlay"
       onClick={() => setSessionEnded(false)}
     >
       <div
-        className="bg-white p-4 rounded-4 shadow-lg"
+        className="modal-premium-content"
         style={{ width: 420, maxWidth: '92vw' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -156,37 +163,40 @@ const GlobalTimerFinishModal = () => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <TimerProvider>
-          <NotificationProvider>
-            <MainLayout>
-              <GlobalTimerFinishModal />
-              <NotificationToast />
+    <ThemeProvider>
+      <Router>
+        <AuthProvider>
+          <TimerProvider>
+            <NotificationProvider>
+              <MainLayout>
+                <GlobalTimerFinishModal />
+                <NotificationToast />
 
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
 
-                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
-                <Route path="/calendar" element={<ProtectedRoute><GlobalCalendar /></ProtectedRoute>} />
-                <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
-                <Route path="/space" element={<ProtectedRoute><YourSpace /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                <Route path="/about" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                  <Route path="/todo" element={<ProtectedRoute><Todo /></ProtectedRoute>} />
+                  <Route path="/calendar" element={<ProtectedRoute><GlobalCalendar /></ProtectedRoute>} />
+                  <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
+                  <Route path="/space" element={<ProtectedRoute><YourSpace /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  <Route path="/about" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
 
-                <Route path="/ask-ai" element={<ProtectedRoute><AskAI /></ProtectedRoute>} />
+                  <Route path="/ask-ai" element={<ProtectedRoute><AskAI /></ProtectedRoute>} />
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </MainLayout>
-          </NotificationProvider>
-        </TimerProvider>
-      </AuthProvider>
-    </Router>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </MainLayout>
+            </NotificationProvider>
+          </TimerProvider>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

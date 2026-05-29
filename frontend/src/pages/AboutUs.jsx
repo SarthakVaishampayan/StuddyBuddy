@@ -142,7 +142,7 @@ const AboutUs = () => {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        notifyInfo('Sent! Check your email (Web3Forms).');
+        notifyInfo('Sent! Thank you for reaching out. We will get back to you as soon as possible.');
         setForm((prev) => ({ ...prev, subject: '', type: 'bug', message: '', botcheck: '' }));
       } else {
         notifyError(data.message || 'Failed to send. Please try again.');
@@ -156,13 +156,13 @@ const AboutUs = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       {/* FIX: pass real reminders so notification bell works */}
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
+      <div className="p-4 px-lg-5 stagger-children">
         {/* HERO */}
-        <div className="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-4 position-relative overflow-hidden">
+        <div className="card-premium p-4 p-md-5 mb-4 position-relative overflow-hidden">
           <div
             className="position-absolute top-0 end-0"
             style={{
@@ -234,8 +234,8 @@ const AboutUs = () => {
         {/* Developer + Features */}
         <div className="row g-4 mb-4">
           <div className="col-lg-4">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
-              <h6 className="fw-bold mb-3 text-muted text-uppercase" style={{ fontSize: '11px' }}>
+            <div className="card-premium p-4 h-100">
+              <h6 className="fw-bold mb-3 text-uppercase" style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>
                 Developer
               </h6>
 
@@ -284,10 +284,10 @@ const AboutUs = () => {
           </div>
 
           <div className="col-lg-8">
-            <div className="bg-white p-4 rounded-4 shadow-sm border h-100">
+            <div className="card-premium p-4 h-100">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold mb-0">Features</h5>
-                <span className="text-muted small">Everything available inside StudyBuddy</span>
+                <h5 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>Features</h5>
+                <span className="small" style={{ color: 'var(--text-secondary)' }}>Everything available inside StudyBuddy</span>
               </div>
 
               <div className="row g-3">
@@ -319,9 +319,9 @@ const AboutUs = () => {
         </div>
 
         {/* Updates / Version */}
-        <div className="bg-white p-4 rounded-4 shadow-sm border mb-4">
+        <div className="card-premium p-4 mb-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-bold mb-0">Live Version & Updates</h5>
+            <h5 className="fw-bold mb-0" style={{ color: 'var(--text-primary)' }}>Live Version & Updates</h5>
             <span className="badge rounded-pill bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2">
               v{appVersion}
             </span>
@@ -348,21 +348,19 @@ const AboutUs = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-3 text-muted small">
-            Versioning tip: keep it consistent (Major.Minor.Patch) so users know what changed.
-          </div>
+          </div>              <div className="mt-3 small" style={{ color: 'var(--text-secondary)' }}>
+                Versioning tip: keep it consistent (Major.Minor.Patch) so users know what changed.
+              </div>
         </div>
 
         {/* Contact form */}
-        <div className="bg-white p-4 rounded-4 shadow-sm border">
+        <div className="card-premium p-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+            <h5 className="fw-bold mb-0 d-flex align-items-center gap-2" style={{ color: 'var(--text-primary)' }}>
               <MessageSquare size={20} className="text-primary" />
               Contact / Report Bug / Query
             </h5>
-            <span className="text-muted small">Delivery: Web3Forms</span>
+            <span className="small" style={{ color: 'var(--text-secondary)' }}>Delivery: Web3Forms</span>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -440,10 +438,6 @@ const AboutUs = () => {
             />
 
             <div className="mt-4 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 text-muted small">
-                <Bug size={14} />
-                <span>Tip: Mention page name + steps to reproduce.</span>
-              </div>
               <button
                 type="submit"
                 className="btn btn-primary fw-bold rounded-3 d-inline-flex align-items-center gap-2 px-4"

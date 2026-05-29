@@ -82,16 +82,16 @@ const Profile = () => {
   }
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
-        <h2 className="fw-bold mb-4 mt-3">My Profile</h2>
+      <div className="p-4 px-lg-5 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3 gradient-text">My Profile</h2>
 
         <div className="row g-4">
           {/* Left Column — ID Card */}
           <div className="col-lg-4">
-            <div className="bg-white p-4 rounded-4 shadow-sm border text-center">
+            <div className="card-premium p-4 text-center">
               {/* Avatar */}
               <div
                 className="bg-primary bg-opacity-10 rounded-circle border border-primary border-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-3"
@@ -152,7 +152,7 @@ const Profile = () => {
                 { label: 'Habits',       value: statsLoading ? '—' : stats.habitsCount,                       color: 'text-danger'   },
               ].map((s, i) => (
                 <div key={i} className="col-6">
-                  <div className="bg-white p-3 rounded-4 shadow-sm border text-center">
+                  <div className="card-premium p-3 text-center">
                     <div className={`fw-bold fs-4 ${s.color}`}>{s.value}</div>
                     <div className="text-muted" style={{ fontSize: '11px' }}>{s.label}</div>
                   </div>
@@ -165,16 +165,16 @@ const Profile = () => {
           <div className="col-lg-8">
             {/* Bio (only if filled) */}
             {user.bio && (
-              <div className="bg-white p-4 rounded-4 shadow-sm border mb-4">
-                <h6 className="fw-bold mb-2 text-muted text-uppercase" style={{ fontSize: '11px' }}>
+              <div className="card-premium p-4 mb-4">
+                <h6 className="fw-bold mb-2 text-uppercase" style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>
                   About Me
                 </h6>
-                <p className="mb-0 text-dark">{user.bio}</p>
+                <p className="mb-0" style={{ color: 'var(--text-primary)' }}>{user.bio}</p>
               </div>
             )}
 
             {/* Achievement Highlights */}
-            <div className="bg-white p-4 rounded-4 shadow-sm border">
+            <div className="card-premium p-4">
               <h5 className="fw-bold mb-4 d-flex align-items-center gap-2">
                 <Trophy size={20} className="text-warning" /> Highlights
               </h5>

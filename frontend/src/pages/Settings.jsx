@@ -150,18 +150,18 @@ const Settings = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
-        <h2 className="fw-bold mb-4 mt-3">Settings</h2>
+      <div className="p-4 px-lg-5 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3 gradient-text">Settings</h2>
 
         <div className="row g-4">
           {/* ── Left Main Column ── */}
           <div className="col-lg-8">
 
             {/* 1. Edit Information */}
-            <div className="bg-white rounded-4 shadow-sm border overflow-hidden mb-4">
+            <div className="card-premium overflow-hidden mb-4">
               <div className="p-4 border-bottom" style={{ background: '#f8f9ff' }}>
                 <h6 className="fw-bold mb-0 d-flex align-items-center gap-2">
                   <User size={16} className="text-primary" /> Edit Information
@@ -238,7 +238,7 @@ const Settings = () => {
             </div>
 
             {/* 2. Change Password */}
-            <div className="bg-white rounded-4 shadow-sm border overflow-hidden mb-4">
+            <div className="card-premium overflow-hidden mb-4">
               <div className="p-4 border-bottom" style={{ background: '#f8f9ff' }}>
                 <h6 className="fw-bold mb-0 d-flex align-items-center gap-2">
                   <Key size={16} className="text-warning" /> Change Password
@@ -366,7 +366,7 @@ const Settings = () => {
             </div> */}
 
             {/* 4. Danger Zone */}
-            <div className="bg-white rounded-4 shadow-sm border overflow-hidden">
+            <div className="card-premium overflow-hidden">
               <div className="p-4 border-bottom bg-danger bg-opacity-10">
                 <h6 className="fw-bold mb-0 text-danger">Danger Zone</h6>
               </div>
@@ -390,7 +390,7 @@ const Settings = () => {
           {/* ── Right Sidebar ── */}
           <div className="col-lg-4">
             {/* Account Info */}
-            <div className="bg-white p-4 rounded-4 shadow-sm border mb-4">
+            <div className="card-premium p-4 mb-4">
               <h6 className="fw-bold mb-4">Account</h6>
 
               <div className="d-flex align-items-center gap-3 mb-3">

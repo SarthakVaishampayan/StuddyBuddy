@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token);
       setToken(data.token);
       setUser(data.user);
-      navigate('/');
+      navigate('/dashboard');
     }
     return data;
   };
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token);
       setToken(data.token);
       setUser(data.user);
-      navigate('/');
+      navigate('/dashboard');
     }
     return data;
   };
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    if (redirect) navigate('/login');
+    if (redirect) navigate('/');
   };
 
   return (

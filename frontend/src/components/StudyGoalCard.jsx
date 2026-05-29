@@ -240,7 +240,7 @@ const StudyGoalCard = () => {
   };
 
   return (
-    <div className="bg-white rounded-4 shadow-sm border p-4 position-relative">
+    <div className="card-premium p-4 position-relative">
       {loading && (
         <div
           className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-4"

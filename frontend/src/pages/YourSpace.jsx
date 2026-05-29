@@ -275,27 +275,27 @@ const YourSpace = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
+      <div className="p-4 px-lg-5 stagger-children">
         <div className="d-flex justify-content-between align-items-center mb-4 mt-3">
           <div>
-            <h2 className="fw-bold mb-1">Your Space</h2>
-            <p className="text-muted small mb-0">Manage your personal resources (Marks & Links).</p>
+            <h2 className="fw-bold mb-1 gradient-text">Your Space</h2>
+            <p className="small mb-0" style={{ color: 'var(--text-secondary)' }}>Manage your personal resources (Marks & Links).</p>
           </div>
         </div>
 
         <div className="row g-4">
           {/* Marks */}
           <div className="col-lg-12">
-            <div className="bg-white p-4 rounded-4 shadow-sm border">
+            <div className="card-premium p-4">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <ClipboardList className="text-primary" size={20} />
                   Marks Manager
                 </h5>
-                <span className="text-muted small">
+                <span className="small" style={{ color: 'var(--text-secondary)' }}>
                   {subjects.length} subject{subjects.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -341,13 +341,13 @@ const YourSpace = () => {
 
           {/* Links */}
           <div className="col-lg-12">
-            <div className="bg-white p-4 rounded-4 shadow-sm border">
+            <div className="card-premium p-4">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <Link2 className="text-success" size={20} />
                   Link Manager
                 </h5>
-                <span className="text-muted small">{links.length} saved</span>
+                <span className="small" style={{ color: 'var(--text-secondary)' }}>{links.length} saved</span>
               </div>
 
               {/* Add link */}
@@ -461,12 +461,11 @@ const YourSpace = () => {
       {/* Marks Modal */}
       {showMarksModal && marksSubject && (
         <div
-          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-          style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 9999, backdropFilter: 'blur(4px)' }}
+          className="modal-premium-overlay"
           onClick={closeMarks}
         >
           <div
-            className="bg-white rounded-4 shadow-lg p-4"
+            className="modal-premium-content"
             style={{ width: '560px', maxWidth: '96vw' }}
             onClick={(e) => e.stopPropagation()}
           >

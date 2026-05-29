@@ -149,13 +149,13 @@ const GlobalCalendar = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5 h-100">
-        <h2 className="fw-bold mb-4 mt-3 text-dark">Global Calendar</h2>
+      <div className="p-4 px-lg-5 h-100 stagger-children">
+        <h2 className="fw-bold mb-4 mt-3 gradient-text">Global Calendar</h2>
 
-        <div className="bg-white p-4 rounded-4 shadow-sm border" style={{ height: '80vh' }}>
+        <div className="card-premium p-4" style={{ height: '80vh' }}>
           {loading ? (
             <div className="w-100 h-100 d-flex justify-content-center align-items-center">
               <div className="spinner-border text-primary" role="status" />

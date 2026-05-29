@@ -179,15 +179,15 @@ const Subjects = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: 'var(--bg-base)' }}>
       <Navbar notifications={reminders} />
 
-      <div className="p-4 px-lg-5">
+      <div className="p-4 px-lg-5 stagger-children">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4 mt-3">
           <div>
-            <h2 className="fw-bold mb-1">Subjects</h2>
-            <p className="text-muted small mb-0">
+            <h2 className="fw-bold mb-1" style={{ color: 'var(--text-primary)' }}>Subjects</h2>
+            <p className="small mb-0" style={{ color: 'var(--text-secondary)' }}>
               {subjects.length} subject{subjects.length !== 1 ? 's' : ''} tracked
             </p>
           </div>
@@ -231,8 +231,8 @@ const Subjects = () => {
               const percent    = total ? Math.round((done / total) * 100) : 0;
 
               return (
-                <div key={subject._id} className="col-lg-6 col-xl-4">
-                  <div className="bg-white rounded-4 shadow-sm border overflow-hidden h-100">
+                <div key={subject._id} className="col-lg-6 col-xl-4 animate-fadeInUp">
+                  <div className="card-premium overflow-hidden h-100 hover-lift">
                     {/* Color accent bar */}
                     <div style={{ height: '5px', backgroundColor: subject.color }} />
 
@@ -266,12 +266,12 @@ const Subjects = () => {
                         </button>
                       </div>
 
-                      {/* Notes */}
-                      {subject.notes && (
-                        <p className="text-muted small mb-3" style={{ lineHeight: 1.4 }}>
-                          {subject.notes}
-                        </p>
-                      )}
+                  {/* Notes */}
+                  {subject.notes && (
+                    <p className="small mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                      {subject.notes}
+                    </p>
+                  )}
 
                       {/* Progress */}
                       <div className="mb-3">
@@ -384,12 +384,11 @@ const Subjects = () => {
       {/* ── Add Subject Modal ── */}
       {showModal && (
         <div
-          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-          style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 9999, backdropFilter: 'blur(4px)' }}
+          className="modal-premium-overlay"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-4 shadow-lg p-4"
+            className="modal-premium-content"
             style={{ width: '480px', maxWidth: '95vw' }}
             onClick={e => e.stopPropagation()}
           >
